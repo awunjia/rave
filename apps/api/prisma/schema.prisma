@@ -1,0 +1,825 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DefaultUserRole {
+  CLIENT
+  CONSULTANT
+  REVIEWER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+}
+
+enum MfaType {
+  EMAIL
+  TOTP
+  PASSKEY
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  LOGIN_CHALLENGE
+}
+
+enum RoleScope {
+  PLATFORM
+  ORGANIZATION
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+  EXPIRED
+}
+
+enum PaymentProvider {
+  STRIPE
+  MTN_MOMO_CM
+  ORANGE_MONEY_CM
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUND_PENDING
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum MeetingProvider {
+  GOOGLE_MEET
+  ZOOM
+}
+
+enum ContentStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum NotificationStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model User {
+  id              String          @id @default(uuid(7)) @db.Uuid
+  email           String          @unique @db.VarChar(320)
+  name            String?         @db.VarChar(200)
+  passwordHash    String?
+  role            DefaultUserRole @default(CLIENT)
+  status          UserStatus      @default(PENDING)
+  emailVerifiedAt DateTime?       @db.Timestamptz(3)
+  mfaEnabled      Boolean         @default(false)
+  lastLoginAt     DateTime?       @db.Timestamptz(3)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @db.Timestamptz(3)
+  deletedAt       DateTime?       @db.Timestamptz(3)
+
+  accounts               AuthAccount[]
+  sessions               Session[]
+  mfaMethods             MfaMethod[]
+  recoveryCodes          RecoveryCode[]
+  failedLoginAttempts    FailedLoginAttempt[]
+  securityEvents         SecurityEvent[]
+  tokens                 AuthToken[]
+  memberships            OrganizationMember[]
+  roleAssignments        UserRole[]
+  consultantProfile      ConsultantProfile?
+  clientBookings         Booking[]                @relation("ClientBookings")
+  consultantBookings     Booking[]                @relation("ConsultantBookings")
+  auditLogs              AuditLog[]               @relation("AuditActor")
+  blogPosts              BlogPost[]               @relation("BlogAuthor")
+  notifications          Notification[]
+  userSetting            UserSetting?
+  analyticsEvents        AnalyticsEvent[]         @relation("AnalyticsActor")
+  meetingAccounts        MeetingProviderAccount[]
+  availabilityRules      AvailabilityRule[]
+  availabilityExceptions AvailabilityException[]
+  notificationPreference NotificationPreference?
+  blogRevisions          BlogRevision[]
+
+  @@index([status, createdAt])
+  @@index([role, status])
+}
+
+model AuthAccount {
+  id                String       @id @default(uuid(7)) @db.Uuid
+  userId            String       @db.Uuid
+  provider          AuthProvider
+  providerAccountId String       @db.VarChar(255)
+  createdAt         DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@unique([userId, provider])
+  @@index([userId])
+}
+
+model Session {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  userId        String    @db.Uuid
+  tokenHash     String    @unique
+  mfaVerifiedAt DateTime? @db.Timestamptz(3)
+  ipAddress     String?   @db.Inet
+  userAgent     String?
+  expiresAt     DateTime  @db.Timestamptz(3)
+  revokedAt     DateTime? @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+model AuthToken {
+  id        String       @id @default(uuid(7)) @db.Uuid
+  userId    String       @db.Uuid
+  purpose   TokenPurpose
+  tokenHash String       @unique
+  expiresAt DateTime     @db.Timestamptz(3)
+  usedAt    DateTime?    @db.Timestamptz(3)
+  createdAt DateTime     @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose, expiresAt])
+}
+
+model MfaMethod {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  userId           String    @db.Uuid
+  type             MfaType
+  name             String?
+  secretCiphertext String?
+  credentialId     String?   @unique
+  publicKey        String?
+  counter          BigInt    @default(0)
+  verifiedAt       DateTime? @db.Timestamptz(3)
+  lastUsedAt       DateTime? @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model RecoveryCode {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  codeHash  String    @unique
+  usedAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, usedAt])
+}
+
+model FailedLoginAttempt {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  userId          String?  @db.Uuid
+  emailNormalized String   @db.VarChar(320)
+  ipAddress       String?  @db.Inet
+  userAgent       String?
+  reason          String
+  attemptedAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([emailNormalized, attemptedAt])
+  @@index([ipAddress, attemptedAt])
+  @@index([userId, attemptedAt])
+}
+
+model SecurityEvent {
+  id        String        @id @default(uuid(7)) @db.Uuid
+  userId    String?       @db.Uuid
+  eventType String        @db.VarChar(100)
+  severity  AuditSeverity @default(INFO)
+  ipAddress String?       @db.Inet
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime      @default(now()) @db.Timestamptz(3)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([severity, createdAt])
+}
+
+model Organization {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String   @db.VarChar(200)
+  slug      String   @unique @db.VarChar(120)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  members            OrganizationMember[]
+  roles              Role[]
+  consultantProfiles ConsultantProfile[]
+  services           Service[]
+  bookings           Booking[]
+  invoices           Invoice[]
+  settings           OrganizationSetting[]
+  meetingAccounts    MeetingProviderAccount[]
+  blogPosts          BlogPost[]
+  analyticsEvents    AnalyticsEvent[]
+
+  @@index([isActive, name])
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  organizationId String   @db.Uuid
+  userId         String   @db.Uuid
+  isActive       Boolean  @default(true)
+  joinedAt       DateTime @default(now()) @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId, isActive])
+}
+
+model Role {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  name           String    @db.VarChar(100)
+  scope          RoleScope
+  organizationId String?   @db.Uuid
+  description    String?
+  isSystem       Boolean   @default(false)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+
+  organization Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions  RolePermission[]
+  assignments  UserRole[]
+
+  @@unique([organizationId, name])
+  @@index([scope, organizationId])
+}
+
+model Permission {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  key         String   @unique @db.VarChar(150)
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  userId         String    @db.Uuid
+  roleId         String    @db.Uuid
+  organizationId String?   @db.Uuid
+  grantedById    String?   @db.Uuid
+  expiresAt      DateTime? @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId, organizationId])
+  @@index([organizationId, userId])
+  @@index([userId, expiresAt])
+}
+
+model AccessPolicy {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  key         String   @unique @db.VarChar(150)
+  description String?
+  isActive    Boolean  @default(true)
+  effect      String   @default("ALLOW")
+  conditions  Json
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  rules AccessRule[]
+}
+
+model AccessRule {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  policyId   String   @db.Uuid
+  resource   String
+  action     String
+  attributes Json
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  policy AccessPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@index([resource, action])
+  @@index([policyId])
+}
+
+model ConsultantProfile {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String   @unique @db.Uuid
+  organizationId String   @db.Uuid
+  headline       String?
+  biography      String?
+  isBookable     Boolean  @default(false)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, isBookable])
+}
+
+model Service {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  organizationId  String   @db.Uuid
+  name            String   @db.VarChar(200)
+  slug            String   @db.VarChar(150)
+  description     String?
+  durationMinutes Int      @default(60)
+  priceMinor      BigInt
+  currency        String   @default("XAF") @db.VarChar(3)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, isActive])
+}
+
+model AvailabilityRule {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  organizationId String    @db.Uuid
+  consultantId   String    @db.Uuid
+  dayOfWeek      Int
+  startMinute    Int
+  endMinute      Int
+  timeZone       String    @db.VarChar(100)
+  effectiveFrom  DateTime? @db.Date
+  effectiveUntil DateTime? @db.Date
+  isActive       Boolean   @default(true)
+
+  consultant User @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, consultantId, dayOfWeek])
+}
+
+model AvailabilityException {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  consultantId String   @db.Uuid
+  startsAt     DateTime @db.Timestamptz(3)
+  endsAt       DateTime @db.Timestamptz(3)
+  reason       String?
+  isAvailable  Boolean  @default(false)
+
+  consultant User @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+
+  @@index([consultantId, startsAt])
+}
+
+model Booking {
+  id                 String        @id @default(uuid(7)) @db.Uuid
+  organizationId     String        @db.Uuid
+  clientId           String        @db.Uuid
+  consultantId       String        @db.Uuid
+  serviceId          String        @db.Uuid
+  status             BookingStatus @default(PENDING_PAYMENT)
+  startsAt           DateTime      @db.Timestamptz(3)
+  endsAt             DateTime      @db.Timestamptz(3)
+  timeZone           String        @db.VarChar(100)
+  priceMinor         BigInt
+  currency           String        @db.VarChar(3)
+  idempotencyKey     String?       @unique
+  expiresAt          DateTime?     @db.Timestamptz(3)
+  cancelledAt        DateTime?     @db.Timestamptz(3)
+  cancellationReason String?
+  createdAt          DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime      @updatedAt @db.Timestamptz(3)
+
+  organization Organization           @relation(fields: [organizationId], references: [id])
+  client       User                   @relation("ClientBookings", fields: [clientId], references: [id])
+  consultant   User                   @relation("ConsultantBookings", fields: [consultantId], references: [id])
+  service      Service                @relation(fields: [serviceId], references: [id])
+  payments     Payment[]
+  meeting      Meeting?
+  history      BookingStatusHistory[]
+  invoice      Invoice?
+
+  @@index([consultantId, startsAt, endsAt])
+  @@index([clientId, startsAt])
+  @@index([organizationId, status, startsAt])
+}
+
+model BookingStatusHistory {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  bookingId  String         @db.Uuid
+  fromStatus BookingStatus?
+  toStatus   BookingStatus
+  reason     String?
+  changedBy  String?        @db.Uuid
+  createdAt  DateTime       @default(now()) @db.Timestamptz(3)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId, createdAt])
+}
+
+model MeetingProviderAccount {
+  id                     String          @id @default(uuid(7)) @db.Uuid
+  userId                 String          @db.Uuid
+  organizationId         String?         @db.Uuid
+  provider               MeetingProvider
+  externalAccountId      String?
+  accessTokenCiphertext  String?
+  refreshTokenCiphertext String?
+  tokenExpiresAt         DateTime?       @db.Timestamptz(3)
+  createdAt              DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime        @updatedAt @db.Timestamptz(3)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, organizationId])
+}
+
+model Meeting {
+  id                String          @id @default(uuid(7)) @db.Uuid
+  bookingId         String          @unique @db.Uuid
+  provider          MeetingProvider
+  externalMeetingId String?
+  joinUrl           String?
+  encryptedHostUrl  String?
+  startsAt          DateTime        @db.Timestamptz(3)
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @db.Timestamptz(3)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([provider, externalMeetingId])
+}
+
+model Payment {
+  id                String          @id @default(uuid(7)) @db.Uuid
+  bookingId         String          @db.Uuid
+  provider          PaymentProvider
+  status            PaymentStatus   @default(PENDING)
+  amountMinor       BigInt
+  currency          String          @db.VarChar(3)
+  providerReference String?
+  idempotencyKey    String          @unique
+  paidAt            DateTime?       @db.Timestamptz(3)
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @db.Timestamptz(3)
+
+  booking  Booking          @relation(fields: [bookingId], references: [id])
+  attempts PaymentAttempt[]
+  refunds  Refund[]
+
+  @@unique([provider, providerReference])
+  @@index([bookingId, status])
+  @@index([provider, status, createdAt])
+}
+
+model PaymentAttempt {
+  id                String        @id @default(uuid(7)) @db.Uuid
+  paymentId         String        @db.Uuid
+  attemptNumber     Int
+  status            PaymentStatus
+  providerReference String?
+  errorCode         String?
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@unique([paymentId, attemptNumber])
+}
+
+model PaymentWebhookEvent {
+  id              String          @id @default(uuid(7)) @db.Uuid
+  provider        PaymentProvider
+  externalEventId String
+  payload         Json
+  processedAt     DateTime?       @db.Timestamptz(3)
+  receivedAt      DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@unique([provider, externalEventId])
+  @@index([processedAt, receivedAt])
+}
+
+model Refund {
+  id                String       @id @default(uuid(7)) @db.Uuid
+  paymentId         String       @db.Uuid
+  amountMinor       BigInt
+  currency          String       @db.VarChar(3)
+  status            RefundStatus @default(PENDING)
+  providerReference String?
+  reason            String?
+  idempotencyKey    String       @unique
+  createdAt         DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+
+  @@index([paymentId, status])
+}
+
+model Invoice {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  organizationId String    @db.Uuid
+  bookingId      String    @unique @db.Uuid
+  invoiceNumber  String    @unique
+  amountMinor    BigInt
+  currency       String    @db.VarChar(3)
+  issuedAt       DateTime  @default(now()) @db.Timestamptz(3)
+  dueAt          DateTime? @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  booking      Booking      @relation(fields: [bookingId], references: [id])
+
+  @@index([organizationId, issuedAt])
+}
+
+model Notification {
+  id        String              @id @default(uuid(7)) @db.Uuid
+  userId    String              @db.Uuid
+  channel   NotificationChannel
+  status    NotificationStatus  @default(PENDING)
+  subject   String?
+  body      String
+  metadata  Json?
+  sentAt    DateTime?           @db.Timestamptz(3)
+  createdAt DateTime            @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+}
+
+model NotificationPreference {
+  id               String  @id @default(uuid(7)) @db.Uuid
+  userId           String  @unique @db.Uuid
+  emailEnabled     Boolean @default(true)
+  remindersEnabled Boolean @default(true)
+  marketingEnabled Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OutboxEvent {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  eventType   String
+  aggregateId String    @db.Uuid
+  payload     Json
+  attempts    Int       @default(0)
+  availableAt DateTime  @default(now()) @db.Timestamptz(3)
+  processedAt DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([processedAt, availableAt])
+}
+
+model BlogPost {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  organizationId String?       @db.Uuid
+  authorId       String        @db.Uuid
+  title          String        @db.VarChar(250)
+  slug           String        @unique @db.VarChar(250)
+  excerpt        String?
+  content        String
+  status         ContentStatus @default(DRAFT)
+  seoTitle       String?
+  seoDescription String?
+  publishedAt    DateTime?     @db.Timestamptz(3)
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+
+  organization Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author       User           @relation("BlogAuthor", fields: [authorId], references: [id])
+  revisions    BlogRevision[]
+  tags         BlogPostTag[]
+
+  @@index([status, publishedAt])
+  @@index([organizationId, status])
+}
+
+model BlogRevision {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  postId    String   @db.Uuid
+  authorId  String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User     @relation(fields: [authorId], references: [id])
+
+  @@index([postId, createdAt])
+}
+
+model BlogCategory {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  name        String  @unique
+  slug        String  @unique
+  description String?
+}
+
+model BlogTag {
+  id   String @id @default(uuid(7)) @db.Uuid
+  name String @unique
+  slug String @unique
+
+  posts BlogPostTag[]
+}
+
+model BlogPostTag {
+  postId String @db.Uuid
+  tagId  String @db.Uuid
+
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model OrganizationSetting {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  organizationId String   @db.Uuid
+  key            String
+  value          Json
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+}
+
+model UserSetting {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @unique @db.Uuid
+  value     Json
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  key         String   @unique
+  value       Json
+  description String?
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  key         String   @unique
+  enabled     Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model AuditLog {
+  id         String        @id @default(uuid(7)) @db.Uuid
+  actorId    String?       @db.Uuid
+  action     String
+  entityType String
+  entityId   String?
+  severity   AuditSeverity @default(INFO)
+  metadata   Json?
+  ipAddress  String?       @db.Inet
+  createdAt  DateTime      @default(now()) @db.Timestamptz(3)
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([severity, createdAt])
+}
+
+model ApplicationEvent {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String
+  level     String
+  message   String?
+  metadata  Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([name, createdAt])
+  @@index([level, createdAt])
+}
+
+model IntegrationHealthCheck {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  integration String
+  isHealthy   Boolean
+  latencyMs   Int?
+  message     String?
+  checkedAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([integration, checkedAt])
+}
+
+model JobExecution {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  jobName    String
+  status     String
+  attempts   Int       @default(0)
+  error      String?
+  startedAt  DateTime  @default(now()) @db.Timestamptz(3)
+  finishedAt DateTime? @db.Timestamptz(3)
+
+  @@index([jobName, startedAt])
+  @@index([status, startedAt])
+}
+
+model AnalyticsEvent {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  organizationId String?  @db.Uuid
+  actorId        String?  @db.Uuid
+  eventName      String
+  anonymousId    String?
+  properties     Json?
+  occurredAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  actor        User?         @relation("AnalyticsActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([eventName, occurredAt])
+  @@index([organizationId, occurredAt])
+}
+
+model DailyMetric {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  metric        String
+  dimensions    Json?
+  dimensionsKey String   @default("{}")
+  value         Decimal  @db.Decimal(20, 4)
+  date          DateTime @db.Date
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([metric, date, dimensionsKey])
+  @@index([metric, date])
+}

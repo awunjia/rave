@@ -1,0 +1,87 @@
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent-hover: var(--accent-hover);
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+}
+
+.skeleton-shimmer::after {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 35%),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+  content: "";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::after {
+    animation: none;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --background: #F8FAFC;
+  --foreground: #102A43;
+  --card: #FFFFFF;
+  --muted: #EEF2F7;
+  --border: #E2E8F0;
+  --primary: #123B66;
+  --primary-foreground: #FFFFFF;
+
+  /* Red hover accent */
+  --accent-hover: #DC2626;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0B1220;
+  --foreground: #F1F5F9;
+  --card: #111C2E;
+  --muted: #1C2A3E;
+  --border: #29384D;
+  --primary: #244D7A;
+  --primary-foreground: #FFFFFF;
+
+  /* Same red in dark mode */
+  --accent-hover: #F87171;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  transition: background-color 180ms ease, color 180ms ease;
+}

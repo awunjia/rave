@@ -1,0 +1,34 @@
+
+.PHONY: fresh start reset stop infra-up urls
+
+# Stop all Rave containers, rebuild infrastructure, preserve data
+fresh:
+	docker compose down --remove-orphans
+	docker compose up -d --build --wait
+	$(MAKE) start
+
+# Start infrastructure if needed, then restart both applications
+start:
+	docker compose up -d --wait
+	npx concurrently --kill-others --names WEB,API --prefix-colors cyan,green "npm --prefix apps/web run dev" "npm --prefix apps/api run start:dev"
+
+# DESTRUCTIVE: delete database volumes and recreate infrastructure
+reset:
+	docker compose down --remove-orphans --volumes
+	docker compose up -d --build --wait
+	$(MAKE) start
+
+# Start infrastructure without running the applications
+infra-up:
+	docker compose up -d --wait
+
+# Stop Rave's applications and containers
+stop:
+	-docker compose down --remove-orphans
+
+# Show service addresses
+urls:
+	@echo "Rave Web:   http://localhost:3000"
+	@echo "Rave API:   http://localhost:4000/api/v1/health"
+	@echo "Postgres:   localhost:5432"
+	@echo "Redis:      localhost:6379"
