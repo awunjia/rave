@@ -21,15 +21,26 @@ export declare class AuthService {
         verificationRequired: boolean;
     }>;
     verifyEmail(dto: VerifyEmailDto): Promise<{
-        message: string;
         user: {
+            roles: {
+                name: string;
+                scope: import("../generated/prisma/enums.js").RoleScope;
+                organizationId: string | null;
+            }[];
             name: string | null;
             email: string;
             id: string;
             status: import("../generated/prisma/enums.js").UserStatus;
         };
+        accessToken: string;
+        tokenType: string;
+        expiresIn: number;
+        message: string;
     }>;
-    login(dto: LoginDto): Promise<{
+    login(dto: LoginDto, context?: {
+        ipAddress?: string;
+        userAgent?: string;
+    }): Promise<{
         user: {
             id: string;
             name: string | null;

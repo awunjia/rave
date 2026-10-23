@@ -107,6 +107,7 @@ export declare const AuthTokenScalarFieldEnum: {
     readonly id: "id";
     readonly userId: "userId";
     readonly purpose: "purpose";
+    readonly attemptCount: "attemptCount";
     readonly tokenHash: "tokenHash";
     readonly expiresAt: "expiresAt";
     readonly usedAt: "usedAt";

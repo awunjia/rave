@@ -4,13 +4,22 @@ import type * as Prisma from "../internal/prismaNamespace.js";
 export type AuthTokenModel = runtime.Types.Result.DefaultSelection<Prisma.$AuthTokenPayload>;
 export type AggregateAuthToken = {
     _count: AuthTokenCountAggregateOutputType | null;
+    _avg: AuthTokenAvgAggregateOutputType | null;
+    _sum: AuthTokenSumAggregateOutputType | null;
     _min: AuthTokenMinAggregateOutputType | null;
     _max: AuthTokenMaxAggregateOutputType | null;
+};
+export type AuthTokenAvgAggregateOutputType = {
+    attemptCount: number | null;
+};
+export type AuthTokenSumAggregateOutputType = {
+    attemptCount: number | null;
 };
 export type AuthTokenMinAggregateOutputType = {
     id: string | null;
     userId: string | null;
     purpose: $Enums.TokenPurpose | null;
+    attemptCount: number | null;
     tokenHash: string | null;
     expiresAt: Date | null;
     usedAt: Date | null;
@@ -20,6 +29,7 @@ export type AuthTokenMaxAggregateOutputType = {
     id: string | null;
     userId: string | null;
     purpose: $Enums.TokenPurpose | null;
+    attemptCount: number | null;
     tokenHash: string | null;
     expiresAt: Date | null;
     usedAt: Date | null;
@@ -29,16 +39,24 @@ export type AuthTokenCountAggregateOutputType = {
     id: number;
     userId: number;
     purpose: number;
+    attemptCount: number;
     tokenHash: number;
     expiresAt: number;
     usedAt: number;
     createdAt: number;
     _all: number;
 };
+export type AuthTokenAvgAggregateInputType = {
+    attemptCount?: true;
+};
+export type AuthTokenSumAggregateInputType = {
+    attemptCount?: true;
+};
 export type AuthTokenMinAggregateInputType = {
     id?: true;
     userId?: true;
     purpose?: true;
+    attemptCount?: true;
     tokenHash?: true;
     expiresAt?: true;
     usedAt?: true;
@@ -48,6 +66,7 @@ export type AuthTokenMaxAggregateInputType = {
     id?: true;
     userId?: true;
     purpose?: true;
+    attemptCount?: true;
     tokenHash?: true;
     expiresAt?: true;
     usedAt?: true;
@@ -57,6 +76,7 @@ export type AuthTokenCountAggregateInputType = {
     id?: true;
     userId?: true;
     purpose?: true;
+    attemptCount?: true;
     tokenHash?: true;
     expiresAt?: true;
     usedAt?: true;
@@ -70,6 +90,8 @@ export type AuthTokenAggregateArgs<ExtArgs extends runtime.Types.Extensions.Inte
     take?: number;
     skip?: number;
     _count?: true | AuthTokenCountAggregateInputType;
+    _avg?: AuthTokenAvgAggregateInputType;
+    _sum?: AuthTokenSumAggregateInputType;
     _min?: AuthTokenMinAggregateInputType;
     _max?: AuthTokenMaxAggregateInputType;
 };
@@ -84,6 +106,8 @@ export type AuthTokenGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
     take?: number;
     skip?: number;
     _count?: AuthTokenCountAggregateInputType | true;
+    _avg?: AuthTokenAvgAggregateInputType;
+    _sum?: AuthTokenSumAggregateInputType;
     _min?: AuthTokenMinAggregateInputType;
     _max?: AuthTokenMaxAggregateInputType;
 };
@@ -91,11 +115,14 @@ export type AuthTokenGroupByOutputType = {
     id: string;
     userId: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount: number;
     tokenHash: string;
     expiresAt: Date;
     usedAt: Date | null;
     createdAt: Date;
     _count: AuthTokenCountAggregateOutputType | null;
+    _avg: AuthTokenAvgAggregateOutputType | null;
+    _sum: AuthTokenSumAggregateOutputType | null;
     _min: AuthTokenMinAggregateOutputType | null;
     _max: AuthTokenMaxAggregateOutputType | null;
 };
@@ -109,6 +136,7 @@ export type AuthTokenWhereInput = {
     id?: Prisma.UuidFilter<"AuthToken"> | string;
     userId?: Prisma.UuidFilter<"AuthToken"> | string;
     purpose?: Prisma.EnumTokenPurposeFilter<"AuthToken"> | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFilter<"AuthToken"> | number;
     tokenHash?: Prisma.StringFilter<"AuthToken"> | string;
     expiresAt?: Prisma.DateTimeFilter<"AuthToken"> | Date | string;
     usedAt?: Prisma.DateTimeNullableFilter<"AuthToken"> | Date | string | null;
@@ -119,6 +147,7 @@ export type AuthTokenOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     userId?: Prisma.SortOrder;
     purpose?: Prisma.SortOrder;
+    attemptCount?: Prisma.SortOrder;
     tokenHash?: Prisma.SortOrder;
     expiresAt?: Prisma.SortOrder;
     usedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -133,6 +162,7 @@ export type AuthTokenWhereUniqueInput = Prisma.AtLeast<{
     NOT?: Prisma.AuthTokenWhereInput | Prisma.AuthTokenWhereInput[];
     userId?: Prisma.UuidFilter<"AuthToken"> | string;
     purpose?: Prisma.EnumTokenPurposeFilter<"AuthToken"> | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFilter<"AuthToken"> | number;
     expiresAt?: Prisma.DateTimeFilter<"AuthToken"> | Date | string;
     usedAt?: Prisma.DateTimeNullableFilter<"AuthToken"> | Date | string | null;
     createdAt?: Prisma.DateTimeFilter<"AuthToken"> | Date | string;
@@ -142,13 +172,16 @@ export type AuthTokenOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     userId?: Prisma.SortOrder;
     purpose?: Prisma.SortOrder;
+    attemptCount?: Prisma.SortOrder;
     tokenHash?: Prisma.SortOrder;
     expiresAt?: Prisma.SortOrder;
     usedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     _count?: Prisma.AuthTokenCountOrderByAggregateInput;
+    _avg?: Prisma.AuthTokenAvgOrderByAggregateInput;
     _max?: Prisma.AuthTokenMaxOrderByAggregateInput;
     _min?: Prisma.AuthTokenMinOrderByAggregateInput;
+    _sum?: Prisma.AuthTokenSumOrderByAggregateInput;
 };
 export type AuthTokenScalarWhereWithAggregatesInput = {
     AND?: Prisma.AuthTokenScalarWhereWithAggregatesInput | Prisma.AuthTokenScalarWhereWithAggregatesInput[];
@@ -157,6 +190,7 @@ export type AuthTokenScalarWhereWithAggregatesInput = {
     id?: Prisma.UuidWithAggregatesFilter<"AuthToken"> | string;
     userId?: Prisma.UuidWithAggregatesFilter<"AuthToken"> | string;
     purpose?: Prisma.EnumTokenPurposeWithAggregatesFilter<"AuthToken"> | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntWithAggregatesFilter<"AuthToken"> | number;
     tokenHash?: Prisma.StringWithAggregatesFilter<"AuthToken"> | string;
     expiresAt?: Prisma.DateTimeWithAggregatesFilter<"AuthToken"> | Date | string;
     usedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AuthToken"> | Date | string | null;
@@ -165,6 +199,7 @@ export type AuthTokenScalarWhereWithAggregatesInput = {
 export type AuthTokenCreateInput = {
     id?: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount?: number;
     tokenHash: string;
     expiresAt: Date | string;
     usedAt?: Date | string | null;
@@ -175,6 +210,7 @@ export type AuthTokenUncheckedCreateInput = {
     id?: string;
     userId: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount?: number;
     tokenHash: string;
     expiresAt: Date | string;
     usedAt?: Date | string | null;
@@ -183,6 +219,7 @@ export type AuthTokenUncheckedCreateInput = {
 export type AuthTokenUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -193,6 +230,7 @@ export type AuthTokenUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     userId?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -202,6 +240,7 @@ export type AuthTokenCreateManyInput = {
     id?: string;
     userId: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount?: number;
     tokenHash: string;
     expiresAt: Date | string;
     usedAt?: Date | string | null;
@@ -210,6 +249,7 @@ export type AuthTokenCreateManyInput = {
 export type AuthTokenUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -219,6 +259,7 @@ export type AuthTokenUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     userId?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -236,15 +277,20 @@ export type AuthTokenCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     userId?: Prisma.SortOrder;
     purpose?: Prisma.SortOrder;
+    attemptCount?: Prisma.SortOrder;
     tokenHash?: Prisma.SortOrder;
     expiresAt?: Prisma.SortOrder;
     usedAt?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
 };
+export type AuthTokenAvgOrderByAggregateInput = {
+    attemptCount?: Prisma.SortOrder;
+};
 export type AuthTokenMaxOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     userId?: Prisma.SortOrder;
     purpose?: Prisma.SortOrder;
+    attemptCount?: Prisma.SortOrder;
     tokenHash?: Prisma.SortOrder;
     expiresAt?: Prisma.SortOrder;
     usedAt?: Prisma.SortOrder;
@@ -254,10 +300,14 @@ export type AuthTokenMinOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     userId?: Prisma.SortOrder;
     purpose?: Prisma.SortOrder;
+    attemptCount?: Prisma.SortOrder;
     tokenHash?: Prisma.SortOrder;
     expiresAt?: Prisma.SortOrder;
     usedAt?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
+};
+export type AuthTokenSumOrderByAggregateInput = {
+    attemptCount?: Prisma.SortOrder;
 };
 export type AuthTokenCreateNestedManyWithoutUserInput = {
     create?: Prisma.XOR<Prisma.AuthTokenCreateWithoutUserInput, Prisma.AuthTokenUncheckedCreateWithoutUserInput> | Prisma.AuthTokenCreateWithoutUserInput[] | Prisma.AuthTokenUncheckedCreateWithoutUserInput[];
@@ -300,9 +350,17 @@ export type AuthTokenUncheckedUpdateManyWithoutUserNestedInput = {
 export type EnumTokenPurposeFieldUpdateOperationsInput = {
     set?: $Enums.TokenPurpose;
 };
+export type IntFieldUpdateOperationsInput = {
+    set?: number;
+    increment?: number;
+    decrement?: number;
+    multiply?: number;
+    divide?: number;
+};
 export type AuthTokenCreateWithoutUserInput = {
     id?: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount?: number;
     tokenHash: string;
     expiresAt: Date | string;
     usedAt?: Date | string | null;
@@ -311,6 +369,7 @@ export type AuthTokenCreateWithoutUserInput = {
 export type AuthTokenUncheckedCreateWithoutUserInput = {
     id?: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount?: number;
     tokenHash: string;
     expiresAt: Date | string;
     usedAt?: Date | string | null;
@@ -344,6 +403,7 @@ export type AuthTokenScalarWhereInput = {
     id?: Prisma.UuidFilter<"AuthToken"> | string;
     userId?: Prisma.UuidFilter<"AuthToken"> | string;
     purpose?: Prisma.EnumTokenPurposeFilter<"AuthToken"> | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFilter<"AuthToken"> | number;
     tokenHash?: Prisma.StringFilter<"AuthToken"> | string;
     expiresAt?: Prisma.DateTimeFilter<"AuthToken"> | Date | string;
     usedAt?: Prisma.DateTimeNullableFilter<"AuthToken"> | Date | string | null;
@@ -352,6 +412,7 @@ export type AuthTokenScalarWhereInput = {
 export type AuthTokenCreateManyUserInput = {
     id?: string;
     purpose: $Enums.TokenPurpose;
+    attemptCount?: number;
     tokenHash: string;
     expiresAt: Date | string;
     usedAt?: Date | string | null;
@@ -360,6 +421,7 @@ export type AuthTokenCreateManyUserInput = {
 export type AuthTokenUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -368,6 +430,7 @@ export type AuthTokenUpdateWithoutUserInput = {
 export type AuthTokenUncheckedUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -376,6 +439,7 @@ export type AuthTokenUncheckedUpdateWithoutUserInput = {
 export type AuthTokenUncheckedUpdateManyWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     purpose?: Prisma.EnumTokenPurposeFieldUpdateOperationsInput | $Enums.TokenPurpose;
+    attemptCount?: Prisma.IntFieldUpdateOperationsInput | number;
     tokenHash?: Prisma.StringFieldUpdateOperationsInput | string;
     expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -385,6 +449,7 @@ export type AuthTokenSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
     id?: boolean;
     userId?: boolean;
     purpose?: boolean;
+    attemptCount?: boolean;
     tokenHash?: boolean;
     expiresAt?: boolean;
     usedAt?: boolean;
@@ -395,6 +460,7 @@ export type AuthTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
     id?: boolean;
     userId?: boolean;
     purpose?: boolean;
+    attemptCount?: boolean;
     tokenHash?: boolean;
     expiresAt?: boolean;
     usedAt?: boolean;
@@ -405,6 +471,7 @@ export type AuthTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
     id?: boolean;
     userId?: boolean;
     purpose?: boolean;
+    attemptCount?: boolean;
     tokenHash?: boolean;
     expiresAt?: boolean;
     usedAt?: boolean;
@@ -415,12 +482,13 @@ export type AuthTokenSelectScalar = {
     id?: boolean;
     userId?: boolean;
     purpose?: boolean;
+    attemptCount?: boolean;
     tokenHash?: boolean;
     expiresAt?: boolean;
     usedAt?: boolean;
     createdAt?: boolean;
 };
-export type AuthTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "purpose" | "tokenHash" | "expiresAt" | "usedAt" | "createdAt", ExtArgs["result"]["authToken"]>;
+export type AuthTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "purpose" | "attemptCount" | "tokenHash" | "expiresAt" | "usedAt" | "createdAt", ExtArgs["result"]["authToken"]>;
 export type AuthTokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 };
@@ -439,6 +507,7 @@ export type $AuthTokenPayload<ExtArgs extends runtime.Types.Extensions.InternalA
         id: string;
         userId: string;
         purpose: $Enums.TokenPurpose;
+        attemptCount: number;
         tokenHash: string;
         expiresAt: Date;
         usedAt: Date | null;
@@ -504,6 +573,7 @@ export interface AuthTokenFieldRefs {
     readonly id: Prisma.FieldRef<"AuthToken", 'String'>;
     readonly userId: Prisma.FieldRef<"AuthToken", 'String'>;
     readonly purpose: Prisma.FieldRef<"AuthToken", 'TokenPurpose'>;
+    readonly attemptCount: Prisma.FieldRef<"AuthToken", 'Int'>;
     readonly tokenHash: Prisma.FieldRef<"AuthToken", 'String'>;
     readonly expiresAt: Prisma.FieldRef<"AuthToken", 'DateTime'>;
     readonly usedAt: Prisma.FieldRef<"AuthToken", 'DateTime'>;

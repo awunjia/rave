@@ -2,51 +2,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Laptop, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        aria-label="Change theme"
-        className="rounded-xl border p-2"
-      >
-        <Sun size={20} />
-      </button>
-    );
-  }
-
-  const Icon =
-    theme === "dark"
-      ? Moon
-      : theme === "light"
-        ? Sun
-        : Laptop;
-
-  const nextTheme =
-    theme === "light"
-      ? "dark"
-      : theme === "dark"
-        ? "system"
-        : "light";
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(nextTheme)}
-      aria-label={`Current theme: ${theme}. Switch theme`}
-      className="rounded-xl border bg-card p-3 text-foreground hover:bg-muted"
+      onClick={() => {
+        setTheme(isDark ? "light" : "dark");
+      }}
+      aria-label={
+        isDark ? "Switch to light mode" : "Switch to dark mode"
+      }
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Icon size={20} />
+      {isDark ? (
+        <Moon size={19} aria-hidden="true" />
+      ) : (
+        <Sun size={19} aria-hidden="true" />
+      )}
     </button>
   );
 }

@@ -7,10 +7,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { IsEmail, IsString, MaxLength, MinLength, Matches, } from 'class-validator';
+import { IsEmail, IsString, MaxLength, MinLength, Matches, IsOptional, IsIn, } from 'class-validator';
 export class RegisterDto {
     name;
     email;
+    locale;
     password;
 }
 __decorate([
@@ -24,6 +25,11 @@ __decorate([
     MaxLength(254),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "email", void 0);
+__decorate([
+    IsOptional(),
+    IsIn(['en', 'fr']),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "locale", void 0);
 __decorate([
     IsString(),
     MinLength(8, {

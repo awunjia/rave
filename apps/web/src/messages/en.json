@@ -1,5 +1,214 @@
 {
     "header": {
-        "workingHours": "Mon – Fri: 09:00 AM – 04:00 PM"
+        "workingHours": "Mon – Fri: 09:00 AM – 04:00 PM",
+        "slogan": "Your Journey, Our Expertise",
+        "bookNow": "Book Now",
+        "mainNavigation": "Main navigation",
+        "mobileNavigation": "Mobile navigation",
+        "homepage": "RAVE homepage",
+        "openMenu": "Open menu",
+        "closeMenu": "Close menu",
+        "openSubmenu": "Open {label} submenu",
+        "closeSubmenu": "Close {label} submenu",
+        "navigation": {
+            "home": "Home",
+            "services": "Services",
+            "visaAssistance": "Visa Assistance",
+            "travelConsultancy": "Travel Consultancy",
+            "studyAbroad": "Study Abroad",
+            "passportAssistance": "Passport Assistance",
+            "flightBooking": "Flight Booking",
+            "resources": "Resources",
+            "ourBlogs": "Our Blogs",
+            "whyUs": "Why Us",
+            "aboutUs": "About Us",
+            "attestations": "Attestations",
+            "testimonials": "Testimonials",
+            "blogs": "Our Blogs",
+            "contactUs": "Contact Us"
+        }
+    },
+    "notFound": {
+        "title": "Page not found",
+        "slogan": "Your Journey, Our Expertise",
+        "description": "The page you're looking for doesn't exist or may have moved.",
+        "backHome": "Back to home",
+        "exploreServices": "Explore our services"
+    },
+    "booking": {
+        "eyebrow": "Book a consultation",
+        "heroTitle": "Expert guidance for",
+        "heroHighlight": "your next steps",
+        "heroDescription": "Get personalized advice tailored to your needs. Book a consultation to discuss your goals, explore your options, and build a clear plan for moving forward.",
+        "loading": "Loading...",
+        "bookConsultation": "Book a consultation",
+        "signInToBook": "Sign in to book",
+        "duration": "Flexible consultation duration",
+        "trust": {
+            "personalized": "Personalized guidance",
+            "transparentPricing": "Transparent pricing"
+        },
+        "imageAlt": "Professional consultation in a welcoming environment",
+        "imageCard": {
+            "title": "Personalized support",
+            "description": "Guidance focused on your needs"
+        },
+        "priceLabel": "Consultation price",
+        "hour": "hour",
+        "formats": {
+            "eyebrow": "Flexible options",
+            "title": "Choose how we meet",
+            "description": "Choose the consultation format that works best for your schedule, preferences, and needs.",
+            "online": {
+                "title": "Online consultation",
+                "description": "Meet with us remotely from wherever you are, using a convenient online format.",
+                "onlinePoint1": "Meet from the comfort of your home",
+                "onlinePoint2": "Save time with no travel required",
+                "onlinePoint3": "Connect remotely from your preferred location"
+            },
+            "onlinePoint1": "Meet from the comfort of your home",
+            "onlinePoint2": "Save time with no travel required",
+            "onlinePoint3": "Connect remotely from your preferred location",
+            "inPerson": {
+                "title": "In-person consultation",
+                "description": "Meet face to face for a personal conversation in a suitable consultation setting."
+            },
+            "inPersonPoint1": "Discuss your needs face to face",
+            "inPersonPoint2": "Enjoy direct, personal interaction",
+            "inPersonPoint3": "Get focused guidance in person"
+        },
+        "benefits": {
+            "eyebrow": "Why choose us",
+            "title": "Support built around you",
+            "description": "Get thoughtful, practical guidance designed to help you make informed decisions with confidence.",
+            "items": {
+                "personalized": {
+                    "title": "Personalized approach",
+                    "description": "Every consultation is tailored to your individual needs, circumstances, and goals."
+                },
+                "expertAdvice": {
+                    "title": "Expert advice",
+                    "description": "Discuss your questions and receive informed guidance to help you evaluate your options."
+                },
+                "clearSteps": {
+                    "title": "Clear next steps",
+                    "description": "Understand your options and leave with a clearer idea of what to do next."
+                },
+                "secureSupport": {
+                    "title": "Secure and trusted support",
+                    "description": "Your consultation is handled with care, professionalism, and respect for your privacy."
+                }
+            }
+        },
+        "pricing": {
+            "eyebrow": "Simple, transparent pricing",
+            "title": "Know what to expect",
+            "description": "Get personalized consultation and practical guidance at a clear, upfront price, with no unexpected charges.",
+            "note": "Consultations available online or in person",
+            "noHiddenFees": "No hidden fees"
+        },
+        "footerNote": "Choose the consultation format that suits you best. Sign in to continue with your booking."
+    },
+    "auth": {
+        "brand": "RAVE",
+        "shell": {
+            "tagline": "Your journey. Our expertise.",
+            "description": "Professional guidance for your visa, travel, and international opportunities.",
+            "trustTitle": "Guidance you can trust",
+            "trustDescription": "Your account and personal information deserve careful protection."
+        },
+        "signin": {
+            "eyebrow": "Welcome back",
+            "title": "Sign in to your account",
+            "description": "Access your consultations and manage your visa journey.",
+            "google": "Continue with Google",
+            "divider": "Or continue with email",
+            "email": "Email address",
+            "emailPlaceholder": "you@example.com",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "showPassword": "Show",
+            "hidePassword": "Hide",
+            "forgotPassword": "Forgot password?",
+            "submit": "Sign in",
+            "submitting": "Signing in...",
+            "noAccount": "Don't have an account?",
+            "register": "Create an account",
+            "termsPrefix": "By continuing, you agree to our",
+            "terms": "Terms of Service",
+            "and": "and",
+            "privacy": "Privacy Policy",
+            "googleLoading": "Connecting to Google...",
+            "errors": {
+                "invalidCredentials": "Unable to sign in with those credentials.",
+                "rateLimited": "Too many attempts. Please try again later.",
+                "network": "Unable to connect. Please try again shortly.",
+                "generic": "Something went wrong. Please try again."
+            }
+        },
+        "register": {
+            "eyebrow": "Get started",
+            "title": "Create your account",
+            "description": "Create your RAVE account to manage your consultations and applications.",
+            "name": "Full name",
+            "namePlaceholder": "Enter your full name",
+            "email": "Email address",
+            "password": "Password",
+            "passwordPlaceholder": "Create a strong password",
+            "otpNotice": "We'll send you a verification code by email. Your registration will be completed after you verify your email address.",
+            "submit": "Continue to verification",
+            "submitting": "Creating your registration...",
+            "hasAccount": "Already have an account?",
+            "signin": "Sign in",
+            "errors": {
+                "emailExists": "We couldn't start your registration with those details. Please check your information or sign in if you already have an account.",
+                "rateLimited": "Too many attempts. Please try again later.",
+                "network": "Unable to connect. Please try again shortly.",
+                "generic": "We couldn't start your registration. Please try again."
+            }
+        },
+        "forgotPassword": {
+            "eyebrow": "Récupération du compte",
+            "title": "Réinitialisez votre mot de passe",
+            "description": "Saisissez votre adresse e-mail pour recevoir les instructions de réinitialisation.",
+            "email": "Adresse e-mail",
+            "submit": "Envoyer les instructions",
+            "submitting": "Envoi des instructions en cours...",
+            "backToSignin": "Retour à la connexion",
+            "tryAnotherEmail": "Essayer une autre adresse e-mail",
+            "successTitle": "Consultez votre boîte de réception",
+            "success": "Si un compte existe pour cette adresse, des instructions de réinitialisation seront envoyées.",
+            "errors": {
+                "rateLimited": "Trop de demandes. Veuillez réessayer plus tard.",
+                "network": "Connexion impossible. Veuillez réessayer dans quelques instants.",
+                "generic": "Nous n'avons pas pu traiter votre demande. Veuillez réessayer."
+            }
+        },
+        "common": {
+            "securityNote": "Your privacy and security matter to us.",
+            "required": "This field is required."
+        },
+        "resetPassword": {
+            "eyebrow": "Account security",
+            "title": "Choose a new password",
+            "description": "Create a new password to securely access your RAVE account.",
+            "password": "New password",
+            "passwordPlaceholder": "Enter your new password",
+            "confirmPassword": "Confirm new password",
+            "confirmPasswordPlaceholder": "Enter your new password again",
+            "submit": "Reset password",
+            "submitting": "Updating password...",
+            "successTitle": "Password updated",
+            "success": "Your password has been changed successfully. You can now sign in with your new password.",
+            "backToSignin": "Back to sign in",
+            "requestNewLink": "Request a new reset link",
+            "errors": {
+                "invalidLink": "This reset link is invalid or has expired. Please request a new one.",
+                "passwordMismatch": "Your passwords do not match.",
+                "rateLimited": "Too many attempts. Please try again later.",
+                "network": "Unable to connect. Please try again shortly.",
+                "generic": "We couldn't reset your password. Please try again."
+            }
+        }
     }
 }

@@ -165,6 +165,7 @@ export const AuthTokenScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   purpose: 'purpose',
+  attemptCount: 'attemptCount',
   tokenHash: 'tokenHash',
   expiresAt: 'expiresAt',
   usedAt: 'usedAt',

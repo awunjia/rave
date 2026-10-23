@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -9,15 +8,62 @@
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-border: var(--border);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+
+  /* Global gold accent */
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-accent-hover: var(--accent-hover);
+
+  /* Gold for buttons, headings, icons, and links */
+  --color-button-primary: var(--button-primary);
+  --color-button-primary-foreground: var(--button-primary-foreground);
+  --color-button-primary-hover: var(--button-primary-hover);
+  --color-heading-accent: var(--heading-accent);
+  --color-icon-accent: var(--icon-accent);
+  --color-link-accent: var(--link-accent);
+
+  /* Marquee */
+  --color-marquee: var(--marquee);
+  --color-marquee-background: var(--marquee-background);
+  --color-marquee-separator: var(--marquee-separator);
 }
 
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::after {
+    animation: none;
+  }
+
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
 .skeleton-shimmer {
@@ -30,48 +76,86 @@
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(255 255 255 / 35%),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgb(255 255 255 / 35%),
+      transparent);
   animation: shimmer 1.6s infinite;
   content: "";
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .skeleton-shimmer::after {
-    animation: none;
-  }
-}
-
 :root {
   color-scheme: light;
+
   --background: #F8FAFC;
   --foreground: #102A43;
   --card: #FFFFFF;
   --muted: #EEF2F7;
   --border: #E2E8F0;
+
+  /* Primary brand colors */
   --primary: #123B66;
   --primary-foreground: #FFFFFF;
 
-  /* Red hover accent */
-  --accent-hover: #DC2626;
+  /* Global gold accent */
+  --accent: #D4AF37;
+  --accent-foreground: #0B1F3A;
+  --accent-hover: #B8941F;
+
+  /* Primary gold buttons */
+  --button-primary: #D4AF37;
+  --button-primary-foreground: #0B1F3A;
+  --button-primary-hover: #B8941F;
+
+  /* Gold headings and highlights */
+  --heading-accent: #947313;
+  --icon-accent: #D4AF37;
+  --link-accent: #947313;
+
+  /* Marquee — light mode */
+  --marquee: #947313;
+  --marquee-background: #F8FAFC;
+  --marquee-separator: #123B66;
+
+  /* Optional red hover accent */
+  --accent-hover-red: #962034;
 }
 
 .dark {
   color-scheme: dark;
+
   --background: #0B1220;
   --foreground: #F1F5F9;
   --card: #111C2E;
   --muted: #1C2A3E;
   --border: #29384D;
+
+  /* Primary brand colors */
   --primary: #244D7A;
   --primary-foreground: #FFFFFF;
 
-  /* Same red in dark mode */
-  --accent-hover: #F87171;
+  /* Global gold accent */
+  --accent: #D4AF37;
+  --accent-foreground: #0B1F3A;
+  --accent-hover: #E5C45B;
+
+  /* Primary gold buttons */
+  --button-primary: #D4AF37;
+  --button-primary-foreground: #0B1F3A;
+  --button-primary-hover: #E5C45B;
+
+  /* Gold headings and highlights */
+  --heading-accent: #D4AF37;
+  --icon-accent: #D4AF37;
+  --link-accent: #E5C45B;
+
+  /* Marquee */
+  --marquee: #D4AF37;
+  --marquee-background: #0B1F3A;
+  --marquee-separator: #FFFFFF;
+
+  /* Optional red hover accent */
+  --accent-hover-red: #D05E5E;
 }
 
 html,

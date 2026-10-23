@@ -11,10 +11,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards, } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
-import { VerifyEmailDto } from "./dto/verify-email.dto.js";
+import { VerifyEmailDto } from './dto/verify-email.dto.js';
 import { JwtAuthGuard, } from './guards/jwt-auth.guard.js';
 let AuthController = class AuthController {
     auth;
@@ -27,8 +28,11 @@ let AuthController = class AuthController {
     verifyEmail(dto) {
         return this.auth.verifyEmail(dto);
     }
-    login(dto) {
-        return this.auth.login(dto);
+    login(dto, request) {
+        return this.auth.login(dto, {
+            ipAddress: request.ip,
+            userAgent: request.get('user-agent') ?? undefined,
+        });
     }
     me(request) {
         return this.auth.getProfile(request.user.sub);
@@ -36,14 +40,16 @@ let AuthController = class AuthController {
 };
 __decorate([
     Post('register'),
+    Throttle({ default: { limit: 5, ttl: 60_000 } }),
     __param(0, Body()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [RegisterDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "register", null);
 __decorate([
-    Post("verify-email"),
+    Post('verify-email'),
     HttpCode(HttpStatus.OK),
+    Throttle({ default: { limit: 5, ttl: 60_000 } }),
     __param(0, Body()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [VerifyEmailDto]),
@@ -52,9 +58,11 @@ __decorate([
 __decorate([
     Post('login'),
     HttpCode(HttpStatus.OK),
+    Throttle({ default: { limit: 5, ttl: 60_000 } }),
     __param(0, Body()),
+    __param(1, Req()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [LoginDto]),
+    __metadata("design:paramtypes", [LoginDto, Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
 __decorate([

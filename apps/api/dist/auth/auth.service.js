@@ -51,69 +51,146 @@ let AuthService = class AuthService {
     }
     async register(dto) {
         const email = this.normalizeEmail(dto.email);
-        const existing = await this.prisma.user.findUnique({
-            where: { email },
-            select: { id: true },
-        });
-        if (existing) {
-            throw new ConflictException("Unable to register with this email.");
-        }
-        const role = await this.prisma.role.findFirst({
-            where: {
-                name: "CLIENT",
-                scope: "PLATFORM",
-                organizationId: null,
-            },
-            select: { id: true },
-        });
-        if (!role) {
-            throw new Error("The CLIENT platform role is missing. Run the database seed.");
-        }
-        const passwordHash = await bcrypt.hash(dto.password, 12);
+        const now = new Date();
+        const cooldownMs = 60_000;
+        const expiresAt = new Date(now.getTime() + 10 * 60_000);
         const code = this.generateVerificationCode();
-        const user = await this.prisma.$transaction(async (tx) => {
-            const created = await tx.user.create({
-                data: {
-                    name: dto.name.trim(),
+        let registration;
+        try {
+            registration = await this.prisma.$transaction(async (tx) => {
+                await tx.$executeRaw `
+          SELECT pg_advisory_xact_lock(
+            hashtextextended(${email}, 0)
+          )`;
+                const existingUser = await tx.user.findUnique({
+                    where: { email },
+                    select: {
+                        id: true,
+                        email: true,
+                        status: true,
+                        emailVerifiedAt: true,
+                    },
+                });
+                if (existingUser &&
+                    (existingUser.status !== 'PENDING' ||
+                        existingUser.emailVerifiedAt)) {
+                    throw new ConflictException('Unable to register with this email.');
+                }
+                let userId;
+                if (existingUser) {
+                    userId = existingUser.id;
+                    const latestToken = await tx.authToken.findFirst({
+                        where: {
+                            userId,
+                            purpose: 'EMAIL_VERIFICATION',
+                            usedAt: null,
+                            expiresAt: { gt: now },
+                        },
+                        orderBy: { createdAt: 'desc' },
+                        select: { createdAt: true },
+                    });
+                    if (latestToken &&
+                        now.getTime() - latestToken.createdAt.getTime() <
+                            cooldownMs) {
+                        throw new BadRequestException('Please wait before requesting another verification code.');
+                    }
+                }
+                else {
+                    const role = await tx.role.findFirst({
+                        where: {
+                            name: 'CLIENT',
+                            scope: 'PLATFORM',
+                            organizationId: null,
+                        },
+                        select: { id: true },
+                    });
+                    if (!role) {
+                        throw new Error('The CLIENT platform role is missing. Run the database seed.');
+                    }
+                    const passwordHash = await bcrypt.hash(dto.password, 12);
+                    const user = await tx.user.create({
+                        data: {
+                            name: dto.name.trim(),
+                            email,
+                            passwordHash,
+                            status: 'PENDING',
+                            emailVerifiedAt: null,
+                            mfaEnabled: false,
+                        },
+                        select: { id: true, email: true },
+                    });
+                    userId = user.id;
+                    await tx.userRole.create({
+                        data: {
+                            userId,
+                            roleId: role.id,
+                            organizationId: null,
+                        },
+                    });
+                }
+                const token = await tx.authToken.create({
+                    data: {
+                        userId,
+                        purpose: 'EMAIL_VERIFICATION',
+                        tokenHash: this.hashVerificationCode(userId, code),
+                        expiresAt,
+                    },
+                    select: { id: true },
+                });
+                return {
+                    userId,
                     email,
-                    passwordHash,
-                    status: "PENDING",
-                    emailVerifiedAt: null,
-                    mfaEnabled: false,
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    status: true,
-                },
+                    tokenId: token.id,
+                    code,
+                };
             });
-            await tx.userRole.create({
-                data: {
-                    userId: created.id,
-                    roleId: role.id,
-                    organizationId: null,
+        }
+        catch (error) {
+            if (error instanceof ConflictException ||
+                error instanceof BadRequestException) {
+                throw error;
+            }
+            if (error &&
+                typeof error === 'object' &&
+                'code' in error &&
+                error.code === 'P2002') {
+                throw new ConflictException('Unable to register with this email.');
+            }
+            throw error;
+        }
+        try {
+            await this.email.sendVerificationCode(registration.email, registration.code, dto.locale ?? 'en');
+        }
+        catch (error) {
+            await this.prisma.authToken.updateMany({
+                where: {
+                    id: registration.tokenId,
+                    userId: registration.userId,
+                    usedAt: null,
                 },
+                data: { usedAt: new Date() },
             });
-            await tx.authToken.create({
-                data: {
-                    userId: created.id,
-                    purpose: "EMAIL_VERIFICATION",
-                    tokenHash: this.hashVerificationCode(created.id, code),
-                    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-                },
-            });
-            return created;
+            throw error;
+        }
+        await this.prisma.authToken.updateMany({
+            where: {
+                userId: registration.userId,
+                purpose: 'EMAIL_VERIFICATION',
+                id: { not: registration.tokenId },
+                usedAt: null,
+            },
+            data: { usedAt: new Date() },
         });
-        await this.email.sendVerificationCode(user.email, code);
         return {
-            message: "Verification code sent to your email.",
-            email: user.email,
+            message: 'Verification code sent to your email.',
+            email: registration.email,
             verificationRequired: true,
         };
     }
     async verifyEmail(dto) {
         const email = this.normalizeEmail(dto.email);
+        const now = new Date();
+        const maxAttempts = 5;
         const user = await this.prisma.user.findUnique({
             where: { email },
             select: {
@@ -123,45 +200,74 @@ let AuthService = class AuthService {
                 emailVerifiedAt: true,
             },
         });
-        if (!user) {
-            throw new BadRequestException("Invalid or expired verification code.");
+        if (!user || user.status !== 'PENDING') {
+            throw new BadRequestException('Invalid or expired verification code.');
         }
-        if (user.emailVerifiedAt && user.status === "ACTIVE") {
-            throw new BadRequestException("Email is already verified.");
-        }
-        const now = new Date();
-        const tokenHash = this.hashVerificationCode(user.id, dto.code);
         const token = await this.prisma.authToken.findFirst({
             where: {
                 userId: user.id,
-                purpose: "EMAIL_VERIFICATION",
-                tokenHash,
+                purpose: 'EMAIL_VERIFICATION',
                 usedAt: null,
                 expiresAt: { gt: now },
             },
-            select: { id: true },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                tokenHash: true,
+            },
         });
         if (!token) {
-            throw new BadRequestException("Invalid or expired verification code.");
+            throw new BadRequestException('Invalid or expired verification code.');
+        }
+        const attempt = await this.prisma.authToken.updateMany({
+            where: {
+                id: token.id,
+                usedAt: null,
+                expiresAt: { gt: now },
+                attemptCount: { lt: maxAttempts },
+            },
+            data: {
+                attemptCount: { increment: 1 },
+            },
+        });
+        if (attempt.count !== 1) {
+            throw new BadRequestException('Invalid or expired verification code.');
+        }
+        const submittedHash = this.hashVerificationCode(user.id, dto.code);
+        if (submittedHash !== token.tokenHash) {
+            throw new BadRequestException('Invalid or expired verification code.');
         }
         const result = await this.prisma.$transaction(async (tx) => {
             const consumed = await tx.authToken.updateMany({
                 where: {
                     id: token.id,
                     usedAt: null,
-                    expiresAt: { gt: now },
+                    expiresAt: { gt: new Date() },
+                    attemptCount: { lte: maxAttempts },
                 },
-                data: { usedAt: now },
+                data: {
+                    usedAt: new Date(),
+                },
             });
             if (consumed.count !== 1) {
-                throw new BadRequestException("Invalid or expired verification code.");
+                throw new BadRequestException('Invalid or expired verification code.');
             }
-            return tx.user.update({
-                where: { id: user.id },
-                data: {
-                    emailVerifiedAt: now,
-                    status: "ACTIVE",
+            const activated = await tx.user.updateMany({
+                where: {
+                    id: user.id,
+                    status: 'PENDING',
+                    emailVerifiedAt: null,
                 },
+                data: {
+                    emailVerifiedAt: new Date(),
+                    status: 'ACTIVE',
+                },
+            });
+            if (activated.count !== 1) {
+                throw new BadRequestException('Invalid or expired verification code.');
+            }
+            return tx.user.findUniqueOrThrow({
+                where: { id: user.id },
                 select: {
                     id: true,
                     name: true,
@@ -170,12 +276,42 @@ let AuthService = class AuthService {
                 },
             });
         });
+        const authToken = await this.issueToken({
+            id: result.id,
+            email: result.email,
+        });
+        const assignments = await this.prisma.userRole.findMany({
+            where: {
+                userId: result.id,
+                OR: [
+                    { expiresAt: null },
+                    { expiresAt: { gt: new Date() } },
+                ],
+            },
+            select: {
+                role: {
+                    select: {
+                        name: true,
+                        scope: true,
+                        organizationId: true,
+                    },
+                },
+            },
+        });
         return {
-            message: "Email verified successfully. You can now sign in.",
-            user: result,
+            message: 'Email verified successfully.',
+            ...authToken,
+            user: {
+                ...result,
+                roles: assignments.map((assignment) => ({
+                    name: assignment.role.name,
+                    scope: assignment.role.scope,
+                    organizationId: assignment.role.organizationId,
+                })),
+            },
         };
     }
-    async login(dto) {
+    async login(dto, context) {
         const email = this.normalizeEmail(dto.email);
         const user = await this.prisma.user.findUnique({
             where: { email },

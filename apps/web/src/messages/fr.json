@@ -1,5 +1,214 @@
 {
     "header": {
-        "workingHours": "Lun – Ven : 09:00 – 16:00"
+        "workingHours": "Lun. – Ven. : 09 h 00 – 16 h 00",
+        "slogan": "Votre parcours, notre expertise",
+        "bookNow": "Réservation",
+        "mainNavigation": "Navigation principale",
+        "mobileNavigation": "Navigation mobile",
+        "homepage": "Page d'accueil de RAVE",
+        "openMenu": "Ouvrir le menu",
+        "closeMenu": "Fermer le menu",
+        "openSubmenu": "Ouvrir le sous-menu {label}",
+        "closeSubmenu": "Fermer le sous-menu {label}",
+        "navigation": {
+            "home": "Accueil",
+            "services": "Services",
+            "visaAssistance": "Assistance pour les visas",
+            "travelConsultancy": "Conseil en voyages",
+            "studyAbroad": "Étudier à l'étranger",
+            "passportAssistance": "Assistance pour les passeports",
+            "flightBooking": "Réservation de vols",
+            "resources": "Ressources",
+            "ourBlogs": "Nos articles",
+            "whyUs": "Pourquoi nous choisir",
+            "aboutUs": "À propos de nous",
+            "attestations": "Légalisation et attestations",
+            "testimonials": "Témoignages",
+            "blogs": "Nos articles",
+            "contactUs": "Nous contacter"
+        }
+    },
+    "notFound": {
+        "title": "Page introuvable",
+        "slogan": "Votre parcours, notre expertise",
+        "description": "La page que vous recherchez n'existe pas ou a peut-être été déplacée.",
+        "backHome": "Retour à l'accueil",
+        "exploreServices": "Découvrir nos services"
+    },
+    "booking": {
+        "eyebrow": "Réserver une consultation",
+        "heroTitle": "Des conseils d'experts pour",
+        "heroHighlight": "préparer la suite",
+        "heroDescription": "Bénéficiez de conseils personnalisés adaptés à vos besoins. Réservez une consultation pour discuter de vos objectifs, explorer vos options et établir un plan d'action clair.",
+        "loading": "Chargement...",
+        "bookConsultation": "Réserver une consultation",
+        "signInToBook": "Connectez-vous pour réserver",
+        "duration": "Durée de consultation flexible",
+        "trust": {
+            "personalized": "Conseils personnalisés",
+            "transparentPricing": "Tarification transparente"
+        },
+        "imageAlt": "Consultation professionnelle dans un cadre accueillant",
+        "imageCard": {
+            "title": "Accompagnement personnalisé",
+            "description": "Des conseils adaptés à vos besoins"
+        },
+        "priceLabel": "Prix de la consultation",
+        "hour": "heure",
+        "formats": {
+            "eyebrow": "Des options flexibles",
+            "title": "Choisissez votre mode de rencontre",
+            "description": "Choisissez le format de consultation qui convient le mieux à votre emploi du temps, à vos préférences et à vos besoins.",
+            "online": {
+                "title": "Consultation en ligne",
+                "description": "Rencontrez-nous à distance, où que vous soyez, grâce à un format en ligne pratique.",
+                "onlinePoint1": "Échangez depuis le confort de votre domicile",
+                "onlinePoint2": "Gagnez du temps sans avoir à vous déplacer",
+                "onlinePoint3": "Participez à distance depuis le lieu de votre choix"
+            },
+            "onlinePoint1": "Échangez depuis le confort de votre domicile",
+            "onlinePoint2": "Gagnez du temps sans avoir à vous déplacer",
+            "onlinePoint3": "Participez à distance depuis le lieu de votre choix",
+            "inPerson": {
+                "title": "Consultation en personne",
+                "description": "Rencontrez-nous en personne pour un échange direct dans un cadre de consultation adapté."
+            },
+            "inPersonPoint1": "Discutez de vos besoins en face à face",
+            "inPersonPoint2": "Profitez d'un échange direct et personnalisé",
+            "inPersonPoint3": "Bénéficiez de conseils ciblés en personne"
+        },
+        "benefits": {
+            "eyebrow": "Pourquoi nous choisir",
+            "title": "Un accompagnement pensé pour vous",
+            "description": "Bénéficiez de conseils pratiques et réfléchis pour prendre des décisions éclairées en toute confiance.",
+            "items": {
+                "personalized": {
+                    "title": "Une approche personnalisée",
+                    "description": "Chaque consultation est adaptée à vos besoins, à votre situation et à vos objectifs personnels."
+                },
+                "expertAdvice": {
+                    "title": "Des conseils d'experts",
+                    "description": "Posez vos questions et recevez des conseils éclairés pour évaluer vos différentes options."
+                },
+                "clearSteps": {
+                    "title": "Des prochaines étapes claires",
+                    "description": "Comprenez vos options et repartez avec une idée plus précise des démarches à suivre."
+                },
+                "secureSupport": {
+                    "title": "Un accompagnement fiable et sécurisé",
+                    "description": "Votre consultation est menée avec soin et professionnalisme, dans le respect de votre vie privée."
+                }
+            }
+        },
+        "pricing": {
+            "eyebrow": "Une tarification simple et transparente",
+            "title": "Sachez à quoi vous attendre",
+            "description": "Bénéficiez d'une consultation personnalisée et de conseils pratiques à un tarif clair annoncé à l'avance, sans frais imprévus.",
+            "note": "Consultations disponibles en ligne ou en personne",
+            "noHiddenFees": "Aucun frais caché"
+        },
+        "footerNote": "Choisissez le format de consultation qui vous convient le mieux. Connectez-vous pour poursuivre votre réservation."
+    },
+    "auth": {
+        "brand": "RAVE",
+        "shell": {
+            "tagline": "Votre voyage. Notre expertise.",
+            "description": "Un accompagnement professionnel pour vos visas, vos voyages et vos projets à l'international.",
+            "trustTitle": "Un accompagnement de confiance",
+            "trustDescription": "Votre compte et vos informations personnelles méritent une protection rigoureuse."
+        },
+        "signin": {
+            "eyebrow": "Heureux de vous retrouver",
+            "title": "Connectez-vous à votre compte",
+            "description": "Accédez à vos consultations et gérez vos démarches de visa.",
+            "google": "Continuer avec Google",
+            "divider": "Ou continuer avec votre adresse e-mail",
+            "email": "Adresse e-mail",
+            "emailPlaceholder": "vous@exemple.com",
+            "password": "Mot de passe",
+            "passwordPlaceholder": "Saisissez votre mot de passe",
+            "showPassword": "Afficher",
+            "hidePassword": "Masquer",
+            "forgotPassword": "Mot de passe oublié ?",
+            "submit": "Se connecter",
+            "submitting": "Connexion en cours...",
+            "noAccount": "Vous n'avez pas encore de compte ?",
+            "register": "Créer un compte",
+            "termsPrefix": "En continuant, vous acceptez nos",
+            "terms": "Conditions d'utilisation",
+            "and": "et notre",
+            "privacy": "Politique de confidentialité",
+            "googleLoading": "Connexion à Google...",
+            "errors": {
+                "invalidCredentials": "Impossible de vous connecter avec ces identifiants.",
+                "rateLimited": "Trop de tentatives. Veuillez réessayer plus tard.",
+                "network": "Connexion impossible. Veuillez réessayer dans quelques instants.",
+                "generic": "Une erreur s'est produite. Veuillez réessayer."
+            }
+        },
+        "register": {
+            "eyebrow": "Commencez ici",
+            "title": "Créez votre compte",
+            "description": "Créez votre compte RAVE pour gérer vos consultations et vos démarches.",
+            "name": "Nom complet",
+            "namePlaceholder": "Saisissez votre nom complet",
+            "email": "Adresse e-mail",
+            "password": "Mot de passe",
+            "passwordPlaceholder": "Créez un mot de passe sécurisé",
+            "otpNotice": "Nous vous enverrons un code de vérification par e-mail. Votre inscription sera finalisée après la vérification de votre adresse e-mail.",
+            "submit": "Continuer vers la vérification",
+            "submitting": "Création de votre inscription...",
+            "hasAccount": "Vous avez déjà un compte ?",
+            "signin": "Se connecter",
+            "errors": {
+                "emailExists": "Nous n'avons pas pu démarrer votre inscription avec ces informations. Vérifiez vos données ou connectez-vous si vous possédez déjà un compte.",
+                "rateLimited": "Trop de tentatives. Veuillez réessayer plus tard.",
+                "network": "Connexion impossible. Veuillez réessayer dans quelques instants.",
+                "generic": "Nous n'avons pas pu démarrer votre inscription. Veuillez réessayer."
+            }
+        },
+        "forgotPassword": {
+            "eyebrow": "Récupération du compte",
+            "title": "Réinitialisez votre mot de passe",
+            "description": "Saisissez votre adresse e-mail pour recevoir les instructions de réinitialisation.",
+            "email": "Adresse e-mail",
+            "submit": "Envoyer les instructions",
+            "submitting": "Envoi des instructions en cours...",
+            "backToSignin": "Retour à la connexion",
+            "tryAnotherEmail": "Essayer une autre adresse e-mail",
+            "successTitle": "Consultez votre boîte de réception",
+            "success": "Si un compte existe pour cette adresse, des instructions de réinitialisation seront envoyées.",
+            "errors": {
+                "rateLimited": "Trop de demandes. Veuillez réessayer plus tard.",
+                "network": "Connexion impossible. Veuillez réessayer dans quelques instants.",
+                "generic": "Nous n'avons pas pu traiter votre demande. Veuillez réessayer."
+            }
+        },
+        "common": {
+            "securityNote": "Votre confidentialité et votre sécurité sont essentielles.",
+            "required": "Ce champ est obligatoire."
+        },
+        "resetPassword": {
+            "eyebrow": "Sécurité du compte",
+            "title": "Choisissez un nouveau mot de passe",
+            "description": "Créez un nouveau mot de passe pour accéder à votre compte RAVE en toute sécurité.",
+            "password": "Nouveau mot de passe",
+            "passwordPlaceholder": "Saisissez votre nouveau mot de passe",
+            "confirmPassword": "Confirmer le nouveau mot de passe",
+            "confirmPasswordPlaceholder": "Saisissez à nouveau votre nouveau mot de passe",
+            "submit": "Réinitialiser le mot de passe",
+            "submitting": "Mise à jour du mot de passe...",
+            "successTitle": "Mot de passe mis à jour",
+            "success": "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+            "backToSignin": "Retour à la connexion",
+            "requestNewLink": "Demander un nouveau lien",
+            "errors": {
+                "invalidLink": "Ce lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.",
+                "passwordMismatch": "Les mots de passe ne correspondent pas.",
+                "rateLimited": "Trop de tentatives. Veuillez réessayer plus tard.",
+                "network": "Connexion impossible. Veuillez réessayer dans quelques instants.",
+                "generic": "Nous n'avons pas pu réinitialiser votre mot de passe. Veuillez réessayer."
+            }
+        }
     }
 }

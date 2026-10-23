@@ -3772,6 +3772,7 @@ export declare const AuthTokenScalarFieldEnum: {
     readonly id: "id";
     readonly userId: "userId";
     readonly purpose: "purpose";
+    readonly attemptCount: "attemptCount";
     readonly tokenHash: "tokenHash";
     readonly expiresAt: "expiresAt";
     readonly usedAt: "usedAt";
@@ -4256,6 +4257,8 @@ export type EnumAuthProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 export type ListEnumAuthProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AuthProvider[]'>;
 export type EnumTokenPurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenPurpose'>;
 export type ListEnumTokenPurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenPurpose[]'>;
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>;
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
 export type EnumMfaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MfaType'>;
 export type ListEnumMfaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MfaType[]'>;
 export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>;
@@ -4266,8 +4269,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>;
 export type EnumRoleScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoleScope'>;
 export type ListEnumRoleScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoleScope[]'>;
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>;
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
 export type EnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus'>;
 export type ListEnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus[]'>;
 export type EnumMeetingProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MeetingProvider'>;
