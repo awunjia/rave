@@ -1,14 +1,16 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
+export type UserRole = "CLIENT" | "CONSULTANT" | "REVIEWER" | "ADMIN" | "SUPER_ADMIN";
 
 export interface CurrentUser {
   id: string;
   name: string;
   email: string;
   status: string;
-  roles: string[];
+  role: UserRole;
+  roles: UserRole[];
 }
 
 interface SessionResponse {

@@ -13,5 +13,12 @@ export declare class EmailService {
     private sendMail;
     sendVerificationCode(to: string, code: string, requestedLocale?: string): Promise<void>;
     sendMfaCode(to: string, code: string, requestedLocale?: string): Promise<void>;
+    sendPasswordResetEmail(to: string, token: string, requestedLocale?: string): Promise<void>;
     sendPasswordResetLink(to: string, resetUrl: string, requestedLocale?: string): Promise<void>;
+    sendMfaActivatedNotification(params: {
+        to: string;
+        name: string;
+        mfaType: string;
+        requestedLocale?: string;
+    }): Promise<void>;
 }

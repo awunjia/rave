@@ -7,9 +7,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthController } from './auth.controller.js';
+import { MfaController } from './mfa.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { RolesGuard } from './guards/roles.guard.js';
 import { EmailModule } from '../email/email.module.js';
 let AuthModule = class AuthModule {
 };
@@ -24,20 +27,32 @@ AuthModule = __decorate([
                 useFactory: (config) => ({
                     secret: config.getOrThrow('JWT_ACCESS_SECRET'),
                     signOptions: {
+                        algorithm: "HS256",
                         expiresIn: 900,
-                        issuer: 'rave-api',
-                        audience: 'rave-web',
+                        issuer: "rave-api",
+                        audience: "rave-web",
                     },
                     verifyOptions: {
-                        issuer: 'rave-api',
-                        audience: 'rave-web',
+                        algorithms: ["HS256"],
+                        issuer: "rave-api",
+                        audience: "rave-web",
                     },
                 }),
             }),
         ],
-        controllers: [AuthController],
-        providers: [AuthService, JwtAuthGuard],
-        exports: [AuthService, JwtAuthGuard],
+        controllers: [AuthController, MfaController],
+        providers: [
+            AuthService,
+            {
+                provide: APP_GUARD,
+                useClass: JwtAuthGuard,
+            },
+            {
+                provide: APP_GUARD,
+                useClass: RolesGuard,
+            },
+        ],
+        exports: [AuthService],
     })
 ], AuthModule);
 export { AuthModule };

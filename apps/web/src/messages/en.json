@@ -110,7 +110,8 @@
         "footerNote": "Choose the consultation format that suits you best. Sign in to continue with your booking."
     },
     "auth": {
-        "brand": "RAVE",
+        "brand": "Rave Consultancy",
+        "slogan": "Your Journey, Our Expertise",
         "shell": {
             "tagline": "Your journey. Our expertise.",
             "description": "Professional guidance for your visa, travel, and international opportunities.",
@@ -168,20 +169,20 @@
             }
         },
         "forgotPassword": {
-            "eyebrow": "Récupération du compte",
-            "title": "Réinitialisez votre mot de passe",
-            "description": "Saisissez votre adresse e-mail pour recevoir les instructions de réinitialisation.",
-            "email": "Adresse e-mail",
-            "submit": "Envoyer les instructions",
-            "submitting": "Envoi des instructions en cours...",
-            "backToSignin": "Retour à la connexion",
-            "tryAnotherEmail": "Essayer une autre adresse e-mail",
-            "successTitle": "Consultez votre boîte de réception",
-            "success": "Si un compte existe pour cette adresse, des instructions de réinitialisation seront envoyées.",
+            "eyebrow": "Account Recovery",
+            "title": "Reset Your Password",
+            "description": "Enter your email address to receive password reset instructions.",
+            "email": "Email Address",
+            "submit": "Send Instructions",
+            "submitting": "Sending instructions...",
+            "backToSignin": "Back to Sign In",
+            "tryAnotherEmail": "Try Another Email Address",
+            "successTitle": "Check Your Inbox",
+            "success": "If an account exists for this email address, password reset instructions will be sent.",
             "errors": {
-                "rateLimited": "Trop de demandes. Veuillez réessayer plus tard.",
-                "network": "Connexion impossible. Veuillez réessayer dans quelques instants.",
-                "generic": "Nous n'avons pas pu traiter votre demande. Veuillez réessayer."
+                "rateLimited": "Too many requests. Please try again later.",
+                "network": "Unable to connect. Please try again in a few moments.",
+                "generic": "We couldn't process your request. Please try again."
             }
         },
         "common": {

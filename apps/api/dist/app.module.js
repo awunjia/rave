@@ -12,6 +12,8 @@ import { HealthController } from './health/health.controller.js';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule, } from '@nestjs/throttler';
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 let AppModule = class AppModule {
 };
@@ -27,11 +29,24 @@ AppModule = __decorate([
                 appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
                 serviceId: 'api',
             }),
+            ThrottlerModule.forRoot([
+                {
+                    name: 'default',
+                    ttl: 60_000,
+                    limit: 100,
+                },
+            ]),
             AuthModule,
             PrismaModule,
         ],
         controllers: [AppController, HealthController],
-        providers: [AppService],
+        providers: [
+            AppService,
+            {
+                provide: APP_GUARD,
+                useClass: ThrottlerGuard,
+            },
+        ],
     })
 ], AppModule);
 export { AppModule };

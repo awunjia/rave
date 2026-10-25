@@ -1,6 +1,6 @@
 
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 type AuthShellProps = {
     children: ReactNode;
@@ -8,6 +8,7 @@ type AuthShellProps = {
     title: string;
     description: string;
     brand: string;
+    subbrand: String;
     tagline: string;
     imageSrc: string;
 };
@@ -18,6 +19,7 @@ export function AuthShell({
     title,
     description,
     brand,
+    subbrand,
     tagline,
     imageSrc,
 }: AuthShellProps) {
@@ -39,11 +41,18 @@ export function AuthShell({
                 <div className="relative z-10">
                     <Link
                         href="/"
-                        className="inline-flex items-center text-xl font-bold tracking-tight text-primary-foreground"
+                        className="inline-flex flex-col items-start text-primary-foreground"
                     >
-                        {brand}
+                        <span className="text-xl font-bold tracking-tight">
+                            {brand}
+                        </span>
+
+                        <span className="mt-1 text-sm font-normal tracking-wide text-primary-foreground/80">
+                            {subbrand}
+                        </span>
                     </Link>
                 </div>
+
 
                 <div className="relative z-10 max-w-xl">
                     <div className="mb-6 h-1 w-14 rounded-full bg-accent" />

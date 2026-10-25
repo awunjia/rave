@@ -1,8 +1,9 @@
-
 "use client";
-import { useState, type FormEvent } from "react";
+
+import { useState, useEffect, Suspense, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
@@ -10,14 +11,17 @@ import { AuthInput } from "@/components/auth/auth-input";
 import { PasswordInput } from "@/components/auth/password-input";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const t = useTranslations("auth");
   const locale = useLocale();
-
+  const router = useRouter();
   const searchParams = useSearchParams();
 
-  const rawReturnTo = searchParams.get("returnTo");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const rawReturnTo = searchParams.get("returnTo");
   const returnTo =
     rawReturnTo &&
       rawReturnTo.startsWith("/") &&
@@ -26,8 +30,15 @@ export default function RegisterPage() {
       ? rawReturnTo
       : "/booking/schedule";
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // Prevent rendering form UI if user is already authenticated
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      router.replace(`/${locale}/portal`);
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [locale, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,7 +46,6 @@ export default function RegisterPage() {
     if (loading) return;
 
     const formData = new FormData(event.currentTarget);
-
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
@@ -79,24 +89,39 @@ export default function RegisterPage() {
         } else {
           setError(t("register.errors.generic"));
         }
-
+        setLoading(false);
         return;
       }
 
-      if (result?.verificationRequired !== true) {
-        setError(t("register.errors.generic"));
+      // If registration requires OTP verification step
+      if (result?.verificationRequired === true) {
+        const query = new URLSearchParams({
+          email: String(result.email ?? email).trim().toLowerCase(),
+          returnTo,
+        });
+
+        window.location.assign(
+          `/${locale}/auth/verify-otp?${query.toString()}`
+        );
         return;
       }
 
-      const query = new URLSearchParams({
-        email: String(result.email ?? email).trim().toLowerCase(),
-        returnTo,
-      });
+      // If direct login access token is returned
+      if (result?.accessToken) {
+        localStorage.setItem("accessToken", result.accessToken);
 
-      window.location.assign(
-        `/${locale}/auth/verify-otp?${query.toString()}`
-      );
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ accessToken: result.accessToken }),
+        });
 
+        window.location.assign(`/${locale}/portal`);
+        return;
+      }
+
+      setError(t("register.errors.generic"));
     } catch {
       setError(t("register.errors.network"));
     } finally {
@@ -104,11 +129,19 @@ export default function RegisterPage() {
     }
   }
 
-
+  // Hydration guard: Show loading spinner instead of flickering the form
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-64 w-full items-center justify-center">
+        <Loader2 className="animate-spin text-amber-500" size={32} />
+      </div>
+    );
+  }
 
   return (
     <AuthShell
       brand={t("brand")}
+      subbrand={t("slogan")}
       eyebrow={t("register.eyebrow")}
       title={t("register.title")}
       description={t("register.description")}
@@ -170,7 +203,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-button-primary px-4 py-3.5 text-sm font-semibold text-button-primary-foreground shadow-sm transition-colors hover:bg-button-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-button-primary px-4 py-3.5 text-sm font-semibold text-button-primary-foreground shadow-sm transition-colors hover:bg-button-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {loading
               ? t("register.submitting")
@@ -208,10 +241,24 @@ export default function RegisterPage() {
           </Link>
         </p>
 
-        <p className="text-center text-xs leading-5 text-foreground/60">
+        {/* <p className="text-center text-xs leading-5 text-foreground/60">
           {t("common.securityNote")}
-        </p>
+        </p> */}
       </div>
     </AuthShell>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen w-full items-center justify-center bg-slate-950">
+          <Loader2 className="animate-spin text-amber-500" size={32} />
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }

@@ -7,13 +7,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { IsEmail, MaxLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsIn } from 'class-validator';
 export class ForgotPasswordDto {
     email;
+    locale;
 }
 __decorate([
     IsEmail(),
-    MaxLength(254),
     __metadata("design:type", String)
 ], ForgotPasswordDto.prototype, "email", void 0);
+__decorate([
+    IsOptional(),
+    IsString(),
+    IsIn(['en', 'fr']),
+    __metadata("design:type", String)
+], ForgotPasswordDto.prototype, "locale", void 0);
 //# sourceMappingURL=forgot.dto.js.map

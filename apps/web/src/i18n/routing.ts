@@ -4,7 +4,7 @@ import { defineRouting } from "next-intl/routing";
 export const routing = defineRouting({
     locales: ["en", "fr"],
     defaultLocale: "en",
-    localePrefix: "as-needed",
+    localePrefix: "always",
 
     pathnames: {
         "/": "/",
@@ -34,9 +34,19 @@ export const routing = defineRouting({
             fr: "/auth/mot-de-passe-oublie",
         },
 
+        "/auth/reset-password": {
+            en: "/auth/reset-password",
+            fr: "/auth/reinitialisation-mot-de-passe",
+        },
+
         "/auth/verify": {
             en: "/auth/verify-otp",
             fr: "/auth/vérification-otp",
+        },
+
+        "/auth/signout": {
+            en: "/auth/signout",
+            fr: "/auth/déconnexion",
         },
 
         "/services": {
@@ -102,6 +112,21 @@ export const routing = defineRouting({
         "/contact-us": {
             en: "/contact-us",
             fr: "/contactez-nous",
+        },
+
+        "/portal": {
+            en: "/portal",
+            fr: "/portail",
+        },
+
+        "/portal/my-profile": {
+            en: "/portal/my-profile",
+            fr: "/portail/mon-profile",
+        },
+
+        "/portal/my-account": {
+            en: "/portal/my-account",
+            fr: "/portail/mon-compte",
         },
 
         "/portal/appointments": {

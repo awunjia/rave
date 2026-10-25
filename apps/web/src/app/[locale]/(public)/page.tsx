@@ -1,4 +1,5 @@
-import HomePage from "./(public)/home-page";
+import HomePage from "./home-page";
+
 
 export default function LocaleHomePage() {
   return <HomePage />;

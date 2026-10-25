@@ -7,36 +7,55 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Injectable, UnauthorizedException, } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-let JwtAuthGuard = class JwtAuthGuard {
+import { Injectable, UnauthorizedException, } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { Reflector } from "@nestjs/core";
+import { IS_PUBLIC_KEY } from "../decorators/public.decorator.js";
+let _JwtAuthGuard = class _JwtAuthGuard {
     jwt;
-    constructor(jwt) {
+    reflector;
+    constructor(jwt, reflector) {
         this.jwt = jwt;
+        this.reflector = reflector;
     }
     async canActivate(context) {
-        const request = context
-            .switchToHttp()
-            .getRequest();
-        const [scheme, token] = request.headers.authorization?.split(' ') ?? [];
-        if (scheme !== 'Bearer' || !token) {
-            throw new UnauthorizedException('Authentication required.');
+        const isPublic = this.reflector.getAllAndOverride(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (isPublic) {
+            return true;
+        }
+        const request = context.switchToHttp().getRequest();
+        const authorization = request.headers.authorization;
+        const match = authorization?.match(/^Bearer ([^\s]+)$/);
+        if (!match) {
+            throw new UnauthorizedException("Authentication required.");
         }
         try {
-            request.user = await this.jwt.verifyAsync(token);
-            if (!request.user.sub || !request.user.email) {
-                throw new UnauthorizedException('Invalid access token.');
+            const payload = await this.jwt.verifyAsync(match[1], {
+                algorithms: ["HS256"],
+            });
+            if (typeof payload.sub !== "string" ||
+                !payload.sub ||
+                typeof payload.email !== "string" ||
+                !payload.email ||
+                !payload.role ||
+                payload.tokenUse !== "access") {
+                throw new UnauthorizedException("Invalid access token payload.");
             }
+            request.user = payload;
             return true;
         }
         catch {
-            throw new UnauthorizedException('Invalid or expired access token.');
+            throw new UnauthorizedException("Invalid or expired access token.");
         }
     }
 };
-JwtAuthGuard = __decorate([
+_JwtAuthGuard = __decorate([
     Injectable(),
-    __metadata("design:paramtypes", [JwtService])
-], JwtAuthGuard);
-export { JwtAuthGuard };
+    __metadata("design:paramtypes", [JwtService,
+        Reflector])
+], _JwtAuthGuard);
+export { _JwtAuthGuard as JwtAuthGuard };
 //# sourceMappingURL=jwt-auth.guard.js.map

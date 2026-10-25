@@ -1,16 +1,28 @@
-
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module.js';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule, ObserveInstrument } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Pass the ObserveInstrument option here to fix the tracing span error
+  const app = await NestFactory.create(AppModule, {
+    instrument: ObserveInstrument,
+  });
 
   app.setGlobalPrefix('api/v1');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   app.enableCors({
     origin: process.env.WEB_URL ?? 'http://localhost:3000',
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   const port = Number(process.env.PORT) || 4000;

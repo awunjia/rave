@@ -1,38 +1,44 @@
-
 "use client";
 
-"use client";
-
-import { useState, type FormEvent } from "react";
-import Link from "next/link";
+import { useState, useEffect, Suspense, type FormEvent } from "react";
+import { Link } from "@/i18n/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { PasswordInput } from "@/components/auth/password-input";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const t = useTranslations("auth");
   const locale = useLocale();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token") ?? "";
 
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    const activeToken = localStorage.getItem("accessToken");
+    if (activeToken) {
+      router.replace(`/${locale}/portal`);
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [locale, router]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (loading) return;
 
     setError("");
     const formData = new FormData(event.currentTarget);
     const password = String(formData.get("password") ?? "");
-    const confirmPassword = String(
-      formData.get("confirmPassword") ?? ""
-    );
+    const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
     if (!token) {
       setError(t("resetPassword.errors.invalidLink"));
@@ -45,7 +51,6 @@ export default function ResetPasswordPage() {
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
-
     if (!apiUrl) {
       setError(t("resetPassword.errors.network"));
       return;
@@ -60,16 +65,13 @@ export default function ResetPasswordPage() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ token, password, locale }),
       });
 
       if (!response.ok) {
         if (response.status === 429) {
           setError(t("resetPassword.errors.rateLimited"));
-        } else if (
-          response.status === 400 ||
-          response.status === 401
-        ) {
+        } else if (response.status === 400 || response.status === 401) {
           setError(t("resetPassword.errors.invalidLink"));
         } else {
           setError(t("resetPassword.errors.generic"));
@@ -90,9 +92,18 @@ export default function ResetPasswordPage() {
     }
   }
 
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-64 w-full items-center justify-center">
+        <Loader2 className="animate-spin text-amber-500" size={32} />
+      </div>
+    );
+  }
+
   return (
     <AuthShell
       brand={t("brand")}
+      subbrand={t("slogan")}
       eyebrow={t("resetPassword.eyebrow")}
       title={t("resetPassword.title")}
       description={t("resetPassword.description")}
@@ -100,26 +111,18 @@ export default function ResetPasswordPage() {
       imageSrc="/images/visa-consultation.jpg"
     >
       {success ? (
-        <div
-          role="status"
-          className="space-y-5 rounded-xl border border-border bg-card p-5"
-        >
+        <div role="status" className="space-y-5 rounded-xl border border-border bg-card p-5">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/15 text-heading-accent">
-            <span aria-hidden="true" className="text-xl">
-              ✓
-            </span>
+            <span aria-hidden="true" className="text-xl">✓</span>
           </div>
-
           <h3 className="text-lg font-semibold text-foreground">
             {t("resetPassword.successTitle")}
           </h3>
-
           <p className="text-sm leading-6 text-foreground/70">
             {t("resetPassword.success")}
           </p>
-
           <Link
-            href={`/${locale}/auth/se-connecter`}
+            href="/auth/signin"
             className="inline-flex w-full items-center justify-center rounded-xl bg-button-primary px-4 py-3 font-semibold text-button-primary-foreground transition hover:bg-button-primary-hover"
           >
             {t("resetPassword.backToSignin")}
@@ -127,15 +130,11 @@ export default function ResetPasswordPage() {
         </div>
       ) : !token ? (
         <div className="space-y-5">
-          <p
-            role="alert"
-            className="rounded-xl border border-border bg-muted p-4 text-sm leading-6 text-foreground"
-          >
+          <p role="alert" className="rounded-xl border border-border bg-muted p-4 text-sm leading-6 text-foreground">
             {t("resetPassword.errors.invalidLink")}
           </p>
-
           <Link
-            href={`/${locale}/auth/forgot-password`}
+            href="/auth/forgot-password"
             className="inline-flex w-full items-center justify-center rounded-xl bg-button-primary px-4 py-3 font-semibold text-button-primary-foreground transition hover:bg-button-primary-hover"
           >
             {t("resetPassword.requestNewLink")}
@@ -155,7 +154,6 @@ export default function ResetPasswordPage() {
             minLength={8}
             maxLength={128}
           />
-
           <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
@@ -168,37 +166,37 @@ export default function ResetPasswordPage() {
             minLength={8}
             maxLength={128}
           />
-
           {error && (
-            <p
-              role="alert"
-              aria-live="polite"
-              className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
-            >
+            <p role="alert" aria-live="polite" className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
               {error}
             </p>
           )}
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-button-primary px-4 py-3.5 text-sm font-semibold text-button-primary-foreground shadow-sm transition-colors hover:bg-button-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-button-primary px-4 py-3.5 text-sm font-semibold text-button-primary-foreground shadow-sm transition-colors hover:bg-button-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
-            {loading
-              ? t("resetPassword.submitting")
-              : t("resetPassword.submit")}
+            {loading ? t("resetPassword.submitting") : t("resetPassword.submit")}
           </button>
-
           <p className="text-center">
-            <Link
-              href={`/${locale}/auth/se-connecter`}
-              className="text-sm font-semibold text-link-accent hover:underline"
-            >
+            <Link href="/auth/signin" className="text-sm font-semibold text-link-accent hover:underline">
               {t("resetPassword.backToSignin")}
             </Link>
           </p>
         </form>
       )}
     </AuthShell>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
+        <Loader2 className="animate-spin text-amber-500" size={32} />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

@@ -1,8 +1,19 @@
-
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { getLocale } from "next-intl/server";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
-export function PortalCta() {
+export async function PortalCta() {
+  const locale = await getLocale();
+  const cookieStore = await cookies();
+
+  // Check if any active session token cookie exists
+  const isLoggedIn = !!(
+    cookieStore.get("accessToken")?.value ||
+    cookieStore.get("session")?.value ||
+    cookieStore.get("session_token")?.value
+  );
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       <div className="grid overflow-hidden bg-[#f0ede5] text-[#102b46] md:grid-cols-[1fr_auto]">
@@ -12,30 +23,42 @@ export function PortalCta() {
           </p>
 
           <h2 className="mt-4 max-w-xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Keep your case organized in one place.
+            {isLoggedIn ? "Welcome back to your workspace." : "Keep your case organized in one place."}
           </h2>
 
           <p className="mt-4 max-w-xl text-sm leading-7 text-[#102b46]/70 sm:text-base">
-            Access your applications, organize supporting documents,
-            review your appointments, and follow your case through your
-            personal client portal.
+            {isLoggedIn
+              ? "Your session is active. Jump directly into your dashboard to review case statuses, manage documents, and check appointments."
+              : "Access your applications, organize supporting documents, review your appointments, and follow your case through your personal client portal."}
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/register"
-              className="inline-flex min-h-12 items-center gap-3 bg-[#102b46] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1b4266]"
-            >
-              Create an account
-              <ArrowRight size={17} />
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href={`/${locale}/portal`}
+                className="inline-flex min-h-12 items-center gap-3 bg-[#102b46] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1b4266]"
+              >
+                Enter Client Portal
+                <ArrowRight size={17} />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href={`/${locale}/auth/register`}
+                  className="inline-flex min-h-12 items-center gap-3 bg-[#102b46] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1b4266]"
+                >
+                  Create an account
+                  <ArrowRight size={17} />
+                </Link>
 
-            <Link
-              href="/login"
-              className="inline-flex min-h-12 items-center border border-[#102b46]/20 px-6 py-3 text-sm font-semibold hover:bg-[#102b46]/5"
-            >
-              Sign in
-            </Link>
+                <Link
+                  href={`/${locale}/auth/signin`}
+                  className="inline-flex min-h-12 items-center border border-[#102b46]/20 px-6 py-3 text-sm font-semibold hover:bg-[#102b46]/5"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
           </div>
         </div>
 

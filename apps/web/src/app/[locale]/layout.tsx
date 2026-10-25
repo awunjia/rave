@@ -7,8 +7,6 @@ import {
 import { notFound } from "next/navigation";
 
 import { routing } from "@/i18n/routing";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 
 type Locale = (typeof routing.locales)[number];
 
@@ -35,9 +33,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <SiteHeader />
       {children}
-      <SiteFooter />
     </NextIntlClientProvider>
   );
 }

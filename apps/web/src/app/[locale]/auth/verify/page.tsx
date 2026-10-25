@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -11,7 +10,6 @@ import {
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 
 import { ShieldCheck } from "lucide-react";
@@ -40,7 +38,6 @@ function OtpCells({
       return;
     }
 
-    // Allow pasting the complete OTP into a single cell.
     if (digits.length > 1) {
       const pasted = digits.slice(0, 6);
       onChange(pasted);
@@ -120,7 +117,6 @@ function OtpCells({
 function VerifyOtpForm() {
   const t = useTranslations("auth");
   const locale = useLocale();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const email = (searchParams.get("email") ?? "")
@@ -140,7 +136,7 @@ function VerifyOtpForm() {
       !rawReturnTo.startsWith("//") &&
       !rawReturnTo.includes("\\")
       ? rawReturnTo
-      : "/booking/schedule";
+      : "/portal";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -190,6 +186,7 @@ function VerifyOtpForm() {
             : "Verification failed. Please try again.";
 
         setError(message);
+        setLoading(false);
         return;
       }
 
@@ -198,6 +195,7 @@ function VerifyOtpForm() {
         !result.accessToken
       ) {
         setError("Verification succeeded, but authentication could not be established.");
+        setLoading(false);
         return;
       }
 
@@ -214,31 +212,20 @@ function VerifyOtpForm() {
 
       if (!sessionResponse.ok) {
         setError("Your email is verified, but we could not sign you in. Please try again.");
+        setLoading(false);
         return;
       }
 
-      setSuccess("Email verified successfully. You are now signed in.");
-
-      window.setTimeout(() => {
-        router.replace("/booking/schedule");
-        router.refresh();
-      }, 1000);
-
-      // Allow the user to read the success message before navigating.
-      setSuccess(
-        result?.message ??
-        "Your email has been verified successfully."
-      );
+      setSuccess("Email verified successfully. Redirecting to your portal...");
 
       window.setTimeout(() => {
         window.location.assign(
           `/${locale}${returnTo === "/" ? "" : returnTo}`
         );
-      }, 1200);
+      }, 1000);
 
     } catch {
       setError("Unable to connect to the server. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
@@ -268,8 +255,6 @@ function VerifyOtpForm() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-
-
             <div className="space-y-3">
               <label className="block text-sm font-medium text-foreground">
                 Verification code
@@ -286,14 +271,6 @@ function VerifyOtpForm() {
                 after 10 minutes.
               </p>
             </div>
-
-
-            <p
-              id="verification-help"
-              className="text-xs leading-5 text-foreground/60"
-            >
-              The code expires after 10 minutes.
-            </p>
           </div>
 
           {error && (
@@ -316,7 +293,6 @@ function VerifyOtpForm() {
             </p>
           )}
 
-
           <button
             type="submit"
             disabled={loading || !email || code.length !== 6}
@@ -334,7 +310,6 @@ function VerifyOtpForm() {
               </>
             )}
           </button>
-
         </form>
 
         <p className="text-center text-sm text-foreground/70">

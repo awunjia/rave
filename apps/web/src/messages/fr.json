@@ -110,7 +110,8 @@
         "footerNote": "Choisissez le format de consultation qui vous convient le mieux. Connectez-vous pour poursuivre votre réservation."
     },
     "auth": {
-        "brand": "RAVE",
+        "brand": "Rave Consultancy",
+        "slogan": "Votre parcours, Notre expertise",
         "shell": {
             "tagline": "Votre voyage. Notre expertise.",
             "description": "Un accompagnement professionnel pour vos visas, vos voyages et vos projets à l'international.",

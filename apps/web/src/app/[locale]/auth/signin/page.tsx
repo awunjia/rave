@@ -1,9 +1,10 @@
-
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthInput } from "@/components/auth/auth-input";
@@ -13,9 +14,21 @@ import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 export default function SignInPage() {
     const t = useTranslations("auth");
     const locale = useLocale();
+    const router = useRouter();
 
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // Prevent rendering form UI if user is already authenticated
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+            router.replace(`/${locale}/portal`);
+        } else {
+            setIsCheckingAuth(false);
+        }
+    }, [locale, router]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -28,18 +41,10 @@ export default function SignInPage() {
         const formData = new FormData(event.currentTarget);
         const email = String(formData.get("email") ?? "").trim();
         const password = String(formData.get("password") ?? "");
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
-
-        if (!apiUrl) {
-            setError(t("signin.errors.network"));
-            setLoading(false);
-            return;
-        }
 
         try {
-            const response = await fetch(`${apiUrl}/auth/login`, {
+            const response = await fetch("/api/auth/login", {
                 method: "POST",
-                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
@@ -50,29 +55,83 @@ export default function SignInPage() {
             if (!response.ok) {
                 if (response.status === 429) {
                     setError(t("signin.errors.rateLimited"));
-                } else if (
-                    response.status === 400 ||
-                    response.status === 401
-                ) {
+                } else if (response.status === 400 || response.status === 401) {
                     setError(t("signin.errors.invalidCredentials"));
                 } else {
                     setError(t("signin.errors.generic"));
                 }
-
+                setLoading(false);
                 return;
             }
 
-            window.location.assign(`/${locale}`);
+            const result: any = await response.json();
+
+            // Handle MFA Challenge Step if MFA is enabled
+            if (result && result.mfaRequired) {
+                sessionStorage.setItem("mfaChallenge", JSON.stringify(result));
+                window.location.assign(`/${locale}/auth/mfa-challenge`);
+                return;
+            }
+
+            if (!result || typeof result !== "object" || !result.accessToken) {
+                setError(t("signin.errors.generic"));
+                setLoading(false);
+                return;
+            }
+
+            // 1. Save access token to localStorage
+            localStorage.setItem("accessToken", result.accessToken);
+
+            // 2. Establish session cookie scoped to root "/" for Middleware/Server Components
+            const sessionRes = await fetch("/api/auth/session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify({ accessToken: result.accessToken }),
+            });
+
+            if (!sessionRes.ok) {
+                setError(t("signin.errors.generic"));
+                setLoading(false);
+                return;
+            }
+
+            // Determine destination & redirect safely
+            const params = new URLSearchParams(window.location.search);
+            const rawReturnTo = params.get("returnTo");
+            const fallbackUrl = `/${locale}/portal`;
+
+            let destination = fallbackUrl;
+
+            if (
+                rawReturnTo &&
+                rawReturnTo.startsWith("/") &&
+                !rawReturnTo.startsWith("//") &&
+                !rawReturnTo.includes("\\")
+            ) {
+                destination = `/${locale}${rawReturnTo === "/" ? "" : rawReturnTo}`;
+            }
+
+            window.location.assign(destination);
         } catch {
             setError(t("signin.errors.network"));
-        } finally {
             setLoading(false);
         }
+    }
+
+    // Hydration guard: Show loading spinner instead of flickering the form
+    if (isCheckingAuth) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center bg-slate-950">
+                <Loader2 className="animate-spin text-amber-500" size={32} />
+            </div>
+        );
     }
 
     return (
         <AuthShell
             brand={t("brand")}
+            subbrand={t("slogan")}
             eyebrow={t("signin.eyebrow")}
             title={t("signin.title")}
             description={t("signin.description")}
@@ -144,7 +203,7 @@ export default function SignInPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded-xl bg-button-primary px-4 py-3.5 text-sm font-semibold text-button-primary-foreground shadow-sm transition-colors hover:bg-button-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-xl bg-button-primary px-4 py-3.5 text-sm font-semibold text-button-primary-foreground shadow-sm transition-colors hover:bg-button-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                     >
                         {loading
                             ? t("signin.submitting")
@@ -162,9 +221,9 @@ export default function SignInPage() {
                     </Link>
                 </p>
 
-                <p className="text-center text-xs leading-5 text-foreground/60">
+                {/* <p className="text-center text-xs leading-5 text-foreground/60">
                     {t("common.securityNote")}
-                </p>
+                </p> */}
 
                 <p className="text-center text-xs leading-6 text-foreground/60">
                     {t("signin.termsPrefix")}{" "}

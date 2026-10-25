@@ -31,6 +31,7 @@ const TRANSLATIONS = {
             verification: 'Verify your email address | Rave',
             mfa: 'Your Rave security verification code',
             reset: 'Reset your Rave password',
+            mfaActivated: 'Security Alert: MFA Activated | Rave',
         },
         verification: {
             preheader: 'Confirm your email to complete registration.',
@@ -74,6 +75,16 @@ const TRANSLATIONS = {
             resetExpiry: 'This reset link is valid for a limited time.',
             footer: 'All rights reserved.',
         },
+        mfaActivated: {
+            preheader: 'Multi-factor authentication has been activated on your account.',
+            heading: 'Multi-Factor Authentication Activated',
+            greeting: 'Hello {name},',
+            body: 'This email confirms that <strong>{mfaType}</strong> multi-factor authentication has been successfully activated on your account. On your next sign-in, a security verification challenge will be required.',
+            securityTitle: 'Keep your account secure',
+            securityBody: 'If you did not perform this action, please reset your password immediately.',
+            ignoreNotice: 'This is an automated security notification.',
+            footer: 'All rights reserved.',
+        },
     },
     fr: {
         brandTagline: 'Des consultations en toute confiance.',
@@ -82,6 +93,7 @@ const TRANSLATIONS = {
             verification: 'Vérifiez votre adresse e-mail | Rave',
             mfa: 'Votre code de vérification de sécurité Rave',
             reset: 'Réinitialisez votre mot de passe Rave',
+            mfaActivated: 'Alerte de sécurité : MFA activé | Rave',
         },
         verification: {
             preheader: 'Confirmez votre adresse e-mail pour terminer votre inscription.',
@@ -123,6 +135,16 @@ const TRANSLATIONS = {
             ignoreNotice: "Si vous n'avez pas demandé cette modification, vous pouvez ignorer cet e-mail.",
             resetButton: 'Réinitialiser mon mot de passe',
             resetExpiry: 'Ce lien est valable pendant une durée limitée.',
+            footer: 'Tous droits réservés.',
+        },
+        mfaActivated: {
+            preheader: "L'authentification multifacteur a été activée sur votre compte.",
+            heading: 'Authentification multifacteur activée',
+            greeting: 'Bonjour {name},',
+            body: "Cet e-mail confirme que l'authentification multifacteur <strong>{mfaType}</strong> a été activée sur votre compte. Lors de votre prochaine connexion, un défi de vérification de sécurité sera requis.",
+            securityTitle: 'Protégez votre compte',
+            securityBody: "Si vous n'êtes pas à l'origine de cette action, veuillez réinitialiser votre mot de passe immédiatement.",
+            ignoreNotice: 'Ceci est une notification de sécurité automatique.',
             footer: 'Tous droits réservés.',
         },
     },
@@ -181,7 +203,7 @@ let EmailService = EmailService_1 = class EmailService {
           <td align="center">
             <p style="margin:0 0 12px;font-size:11px;font-weight:700;
                       letter-spacing:1.8px;color:${COLORS.secondary};">
-              ${e(content.codeLabel)}
+              ${e(content.codeLabel ?? '')}
             </p>
             <table role="presentation" cellspacing="0" cellpadding="0"
                    border="0" style="margin:0 auto;">
@@ -213,7 +235,7 @@ let EmailService = EmailService_1 = class EmailService {
             </table>
             <p style="margin:12px 0 0;font-size:12px;line-height:1.8;
                       color:${COLORS.secondary};">
-              ${e(content.copyHint)}
+              ${e(content.copyHint ?? '')}
             </p>
           </td>
         </tr>
@@ -233,15 +255,15 @@ let EmailService = EmailService_1 = class EmailService {
                     background:${COLORS.gold};border-radius:8px;
                     color:${COLORS.navyDark};font-size:15px;
                     font-weight:700;text-decoration:none;">
-            ${e(content.resetButton)}
+            ${e(content.resetButton ?? '')}
           </a>
         </p>
         <p style="font-size:13px;line-height:1.8;color:${COLORS.secondary};">
-          ${e(content.resetExpiry)}
+          ${e(content.resetExpiry ?? '')}
         </p>
         <p style="font-size:12px;line-height:1.8;overflow-wrap:anywhere;
                   color:${COLORS.secondary};">
-          ${e(content.copyHint)}<br />
+          ${e(content.copyHint ?? '')}<br />
           <a href="${e(resetUrl)}" style="color:${COLORS.navy};">
             ${e(resetUrl)}
           </a>
@@ -292,10 +314,10 @@ let EmailService = EmailService_1 = class EmailService {
                         ${e(content.heading)}
                       </h1>
                       <p style="font-size:15px;line-height:1.8;">
-                        ${e(content.greeting)}
+                        ${content.greeting}
                       </p>
                       <p style="font-size:15px;line-height:1.9;">
-                        ${e(content.body)}
+                        ${content.body}
                       </p>
                       ${otpHtml}
                       ${resetHtml}
@@ -412,6 +434,40 @@ let EmailService = EmailService_1 = class EmailService {
             html: this.renderEmail({ locale, content, code }),
         });
     }
+    async sendPasswordResetEmail(to, token, requestedLocale = 'en') {
+        const locale = this.normalizeLocale(requestedLocale);
+        const translations = TRANSLATIONS[locale];
+        const content = translations.reset;
+        const frontendUrl = this.config.get('FRONTEND_URL') ||
+            process.env.FRONTEND_URL ||
+            'http://localhost:3000';
+        const resetPath = locale === 'fr'
+            ? '/auth/reinitialisation-mot-de-passe'
+            : '/auth/reset-password';
+        const resetUrl = `${frontendUrl.replace(/\/+$/, '')}/${locale}${resetPath}?token=${token}`;
+        await this.sendMail({
+            to,
+            subject: translations.subjects.reset,
+            text: [
+                content.heading,
+                '',
+                content.greeting,
+                content.body,
+                '',
+                `${content.resetButton}: ${resetUrl}`,
+                '',
+                content.resetExpiry,
+                content.securityTitle,
+                content.securityBody,
+                content.ignoreNotice,
+            ].join('\n'),
+            html: this.renderEmail({
+                locale,
+                content,
+                resetUrl,
+            }),
+        });
+    }
     async sendPasswordResetLink(to, resetUrl, requestedLocale = 'en') {
         const locale = this.normalizeLocale(requestedLocale);
         const translations = TRANSLATIONS[locale];
@@ -461,6 +517,33 @@ let EmailService = EmailService_1 = class EmailService {
                 content,
                 resetUrl: safeResetUrl,
             }),
+        });
+    }
+    async sendMfaActivatedNotification(params) {
+        const locale = this.normalizeLocale(params.requestedLocale);
+        const translations = TRANSLATIONS[locale];
+        const template = translations.mfaActivated;
+        const greeting = template.greeting.replace('{name}', params.name);
+        const body = template.body.replace('{mfaType}', params.mfaType);
+        const content = {
+            ...template,
+            greeting,
+            body,
+        };
+        await this.sendMail({
+            to: params.to,
+            subject: translations.subjects.mfaActivated,
+            text: [
+                content.heading,
+                '',
+                greeting,
+                body,
+                '',
+                content.securityTitle,
+                content.securityBody,
+                content.ignoreNotice,
+            ].join('\n'),
+            html: this.renderEmail({ locale, content }),
         });
     }
 };

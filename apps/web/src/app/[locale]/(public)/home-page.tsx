@@ -6,7 +6,8 @@ import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { ServicesSection } from "@/components/home/services-section";
 import { ProcessSection } from "@/components/home/process-section";
 import { PortalCta } from "@/components/home/portal-cta";
-import { UsefulLinks } from "@/components/home/useful-links";
+import { MajorOfferings } from "@/components/home/major-offerings";
+import { CountriesSection } from "@/components/home/countriesSection";
 
 export default function HomePage() {
   return (
@@ -14,9 +15,10 @@ export default function HomePage() {
       <HeroSection />
       <AnnouncementBanner />
       <ServicesSection />
-      <ProcessSection />
       <PortalCta />
-      <UsefulLinks />
+      <ProcessSection />
+      <MajorOfferings />
+      <CountriesSection />
     </main>
   );
 }
